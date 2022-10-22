@@ -1,6 +1,7 @@
-﻿using System;
+﻿using  System;
 
-namespace CoreCommandLine.Console
+
+namespace CoreCommandLine.Tdd
 {
     class Program
     {
