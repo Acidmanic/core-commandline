@@ -10,7 +10,7 @@ namespace CoreCommandLine
 {
     public abstract class CommandLineApplication
     {
-        protected List<Type> GetChildrenTypes(Type type)
+        protected List<Type> GetChildrenTypes(Type type, bool addExit)
         {
             var childrenTypes = new List<Type>();
 
@@ -20,39 +20,24 @@ namespace CoreCommandLine
             {
                 childrenTypes.AddRange(childrenAttribute.Children);
             }
-
             
             var genericHelpType = typeof(Help<>);
 
-            
             if (!type.IsGenericType || type.GetGenericTypeDefinition()!= genericHelpType)
             {
                 var helpType = genericHelpType.MakeGenericType(type);
             
                 childrenTypes.Add(helpType);
             }
+
+            if (addExit && type.IsSubclassOf(typeof(CommandLineApplication)))
+            {
+                childrenTypes.Add(typeof(Exit));
+            }
             
             return childrenTypes;
         }
 
-        protected List<ICommand> GetChildren(Type type)
-        {
-            var childrenTypes = GetChildrenTypes(type);
-
-            var children = new List<ICommand>();
-
-            foreach (var childType in childrenTypes)
-            {
-                var child = new ObjectInstantiator().BlindInstantiate(childType) as ICommand;
-
-                if (child != null)
-                {
-                    children.Add(child);
-                }
-            }
-
-            return children;
-        }
 
         public void Execute(string[] args)
         {
@@ -60,16 +45,36 @@ namespace CoreCommandLine
 
             var type = this.GetType();
 
-            Execute(type, context, args);
+            Execute(type, context, args,false);
+        }
+        
+        public void ExecuteInteractive()
+        {
+            var stay = true;
+
+            while (stay)
+            {
+                var context = new Context();
+
+                var type = this.GetType();
+
+                string line = Console.ReadLine();
+
+                var args = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+                
+                Execute(type, context, args,true);
+
+                stay = !context.InteractiveExit;
+            }
         }
 
-        private void Execute(Type parentType, Context context, string[] args)
+        private void Execute(Type parentType, Context context, string[] args,bool useExitCommand)
         {
             if (context.ApplicationExit)
             {
                 return;
             }
-            var childrenTypes = GetChildrenTypes(parentType);
+            var childrenTypes = GetChildrenTypes(parentType,useExitCommand);
 
             foreach (var childType in childrenTypes)
             {
@@ -78,7 +83,7 @@ namespace CoreCommandLine
                     return;
                 }
                 
-                Execute(childType, context, args);
+                Execute(childType, context, args,useExitCommand);
             }
             var instance = new ObjectInstantiator().BlindInstantiate(parentType) as ICommand;
 

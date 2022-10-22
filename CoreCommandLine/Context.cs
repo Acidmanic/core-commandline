@@ -31,5 +31,6 @@ namespace CoreCommandLine
         }
 
         public bool ApplicationExit { get; set; } = false;
+        public bool InteractiveExit { get; set; } = false;
     }
 }
