@@ -1,10 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
 using Acidmanic.Utilities.Reflection;
-using Acidmanic.Utilities.Reflection.Extensions;
-using Acidmanic.Utilities.Reflection.TypeCenter;
 
 namespace CoreCommandLine
 {
@@ -30,50 +26,67 @@ namespace CoreCommandLine
             }
         }
 
-        private Dictionary<string, Type> _typesByName;
-        private Dictionary<string, Type> _typesByShortName;
-        public List<ICommand> CommandInstances { get; }
-
+        
         private CommandFactory()
         {
-            _typesByName = new Dictionary<string, Type>();
-            _typesByShortName = new Dictionary<string, Type>();
-            CommandInstances = new List<ICommand>();
-
-            var assembly = Assembly.GetCallingAssembly();
-
-            var allTypes = assembly.GetAvailableTypes();
-
-            foreach (var type in allTypes)
-            {
-                
-                
-                
-                var instance = new ObjectInstantiator().CreateObject(type, true);
-
-                if (instance != null && instance is ICommand command)
-                {
-                    _typesByName.Add(command.Name, type);
-                    _typesByShortName.Add(command.ShortName, type);
-                    CommandInstances.Add(command);
-                }
-            }
+        
         }
 
-        public ICommand Make(string name)
+        public ICommand Make(string name,Type caller)
         {
-            Type type = typeof(NullCommand);
+            var children = caller.GetChildren();
 
-            if (_typesByName.ContainsKey(name))
-            {
-                type = _typesByName[name];
-            }
-            if (_typesByShortName.ContainsKey(name))
-            {
-                type = _typesByShortName[name];
-            }
+            return Make(name, children);
+        }
+        
+        
+        private ICommand Make(string name,List<Type> children)
+        {
             
-            return new ObjectInstantiator().CreateObject(type, true) as ICommand;
+            if (!string.IsNullOrEmpty(name))
+            {
+                foreach (var child in children)
+                {
+                    var foundName = child.GetCommandName();
+    
+                    if (foundName)
+                    {
+                        if (AreNamesEqual(foundName.Value, name))
+                        {
+                            var instance = 
+                                new ObjectInstantiator()
+                                .BlindInstantiate(child);
+                            if (instance is ICommand command)
+                            {
+                                return command;
+                            }
+                        }
+                    }
+                }      
+            }
+
+            return new NullCommand();
+        }
+
+        private bool AreNamesEqual(NameBundle commandName, string name)
+        {
+            return AreNamesEqual(commandName.Name,name) ||
+                   AreNamesEqual(commandName.ShortName, name);
+        }
+
+        private bool AreNamesEqual(string name1, string name2)
+        {
+            if (name1 == null && name2 == null)
+            {
+                return true;
+            }
+
+            if (name1 == null || name2 == null)
+            {
+                return false;
+            }
+
+            return name1.ToLower() == name2.ToLower();
         }
     }
 }

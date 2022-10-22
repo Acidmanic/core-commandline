@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.Logging;
 
 namespace CoreCommandLine
 {
@@ -7,10 +8,8 @@ namespace CoreCommandLine
         
         bool Execute(Context context, string[] args);
         
-        string Name { get; }
-        
-        string ShortName { get; }
-        
         string Description { get; }
+
+        void SetLogger(ILogger logger);
     }
 }

@@ -15,19 +15,21 @@ namespace CoreCommandLine
             _data.Add(key,value);
         }
 
-        public T Get<T>(string key) where T : class
+        public T Get<T>(string key,T defaultValue) where T : class
         {
             if (_data.ContainsKey(key))
             {
                 return _data[key] as T;
             }
 
-            return default;
+            return defaultValue;
         }
 
         public bool Contains(string key)
         {
             return _data.ContainsKey(key);
         }
+
+        public bool ApplicationExit { get; set; } = true;
     }
 }

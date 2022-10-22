@@ -7,7 +7,7 @@ namespace CoreCommandLine.Tdd
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            new ExampleApplication().Execute(args);
         }
     }
 }
