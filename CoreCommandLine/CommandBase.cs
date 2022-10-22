@@ -66,57 +66,31 @@ namespace CoreCommandLine
 
         protected int IndexOf(string name, string[] args)
         {
-            for (int i = 0; i < args.Length; i++)
-            {
-                if (name.ToLower() == args[i].ToLower())
-                {
-                    return i;
-                }
-            }
-
-            return -1;
+            return CommandUtilities.IndexOf(name, args);
         }
 
         protected int IndexOf(NameBundle nameBundle, string[] args)
         {
-            int index = IndexOf(nameBundle.Name, args);
-
-            if (index < 0)
-            {
-                index = IndexOf(nameBundle.ShortName, args);
-            }
-
-            return index;
+            return CommandUtilities.IndexOf(nameBundle, args);
         }
 
         protected bool AreNamesEqual(NameBundle commandName, string name)
         {
-            return AreNamesEqual(commandName.Name, name) ||
-                   AreNamesEqual(commandName.ShortName, name);
+            return CommandUtilities.AreNamesEqual(commandName, name);
         }
 
         protected bool AreNamesEqual(string name1, string name2)
         {
-            if (name1 == null && name2 == null)
-            {
-                return true;
-            }
-
-            if (name1 == null || name2 == null)
-            {
-                return false;
-            }
-
-            return name1.ToLower() == name2.ToLower();
+            return CommandUtilities.AreNamesEqual(name1, name2);
         }
 
-        protected bool IsThisSetMyCommand(Context context,string[] args)
+        protected bool IsThisSetMyCommand(Context context, string[] args)
         {
             var arguments = GetCommandArguments(args);
 
             if (arguments)
             {
-                if (AreNamesEqual(NameBundle,arguments.Value.Command))
+                if (AreNamesEqual(NameBundle, arguments.Value.Command))
                 {
                     return true;
                 }

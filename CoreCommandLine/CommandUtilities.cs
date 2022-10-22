@@ -63,5 +63,27 @@ namespace CoreCommandLine
 
             return index;
         }
+        
+        
+        public static bool AreNamesEqual(NameBundle commandName, string name)
+        {
+            return AreNamesEqual(commandName.Name, name) ||
+                   AreNamesEqual(commandName.ShortName, name);
+        }
+
+        public static bool AreNamesEqual(string name1, string name2)
+        {
+            if (name1 == null && name2 == null)
+            {
+                return true;
+            }
+
+            if (name1 == null || name2 == null)
+            {
+                return false;
+            }
+
+            return name1.ToLower() == name2.ToLower();
+        }
     }
 }
