@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
-using Acidmanic.Utilities.Reflection;
 using Acidmanic.Utilities.Results;
+using CoreCommandLine.Attributes;
 using Microsoft.Extensions.Logging;
 
 namespace CoreCommandLine

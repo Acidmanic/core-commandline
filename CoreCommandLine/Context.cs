@@ -30,6 +30,6 @@ namespace CoreCommandLine
             return _data.ContainsKey(key);
         }
 
-        public bool ApplicationExit { get; set; } = true;
+        public bool ApplicationExit { get; set; } = false;
     }
 }

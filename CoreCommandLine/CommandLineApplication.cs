@@ -14,13 +14,24 @@ namespace CoreCommandLine
         {
             var childrenTypes = new List<Type>();
 
-            var childrenAttribute = type.GetCustomAttributes<SubcommandsAttribute>().FirstOrDefault();
+            var childrenAttribute = type.GetCustomAttributes<SubcommandsAttribute>(true).FirstOrDefault();
 
             if (childrenAttribute != null)
             {
                 childrenTypes.AddRange(childrenAttribute.Children);
             }
 
+            
+            var genericHelpType = typeof(Help<>);
+
+            
+            if (!type.IsGenericType || type.GetGenericTypeDefinition()!= genericHelpType)
+            {
+                var helpType = genericHelpType.MakeGenericType(type);
+            
+                childrenTypes.Add(helpType);
+            }
+            
             return childrenTypes;
         }
 
@@ -54,17 +65,26 @@ namespace CoreCommandLine
 
         private void Execute(Type parentType, Context context, string[] args)
         {
+            if (context.ApplicationExit)
+            {
+                return;
+            }
             var childrenTypes = GetChildrenTypes(parentType);
 
             foreach (var childType in childrenTypes)
             {
+                if (context.ApplicationExit)
+                {
+                    return;
+                }
+                
                 Execute(childType, context, args);
             }
-            var child = new ObjectInstantiator().BlindInstantiate(parentType) as ICommand;
+            var instance = new ObjectInstantiator().BlindInstantiate(parentType) as ICommand;
 
-            if (child != null)
+            if (instance != null && !context.ApplicationExit)
             {
-                child.Execute(context, args);
+                instance.Execute(context, args);
             }
         }
     }

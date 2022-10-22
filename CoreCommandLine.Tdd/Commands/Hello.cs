@@ -32,5 +32,7 @@ namespace CoreCommandLine.Tdd.Commands
             }
             return false;
         }
+
+        public override string Description => "Prints the phrase Hello.";
     }
 }
