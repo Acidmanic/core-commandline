@@ -10,4 +10,23 @@
     <PackageReference Include="Acidmanic.Utilities.Reflections" Version="1.0.2" />
   </ItemGroup>
 
+
+  <PropertyGroup>
+    <Authors>Mani Moayedi</Authors>
+    <Version>1.0.0</Version>
+    <Company>Acidmanic</Company>
+    <PackageIcon>graphics\icon.png</PackageIcon>
+    <Description>This library provides an easy setup for a commandline application.</Description>
+    <Summary>
+      Implement ICommand or Extend CommandBase. Use CommandName attribute to name the command. Use SubCommands attribute to mark next level commands. 
+    </Summary>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- NuGet -->
+    <None Include="..\Graphics\icon.png" Pack="true" PackagePath="\graphics" />
+    <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
+  </ItemGroup>
+  
 </Project>
