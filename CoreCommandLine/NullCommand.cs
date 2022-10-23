@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.Logging;
 
 namespace CoreCommandLine
@@ -13,6 +14,10 @@ namespace CoreCommandLine
         public string ShortName => "";
         public string Description => "";
         public void SetLogger(ILogger logger)
+        {
+        }
+
+        public void SetOutput(Action<string> output)
         {
         }
     }

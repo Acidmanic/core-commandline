@@ -2,6 +2,7 @@ using System;
 using CoreCommandLine.Attributes;
 using CoreCommandLine.Tdd.Commands.Arguments;
 using CoreCommandLine.Tdd.Commands.Models;
+using Microsoft.Extensions.Logging;
 
 namespace CoreCommandLine.Tdd.Commands
 {
@@ -26,7 +27,7 @@ namespace CoreCommandLine.Tdd.Commands
                     message = message.ToLower();
                 }
 
-                Console.WriteLine(message);
+                Output(message);
 
                 return true;
             }

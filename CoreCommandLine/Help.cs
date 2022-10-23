@@ -8,6 +8,9 @@ namespace CoreCommandLine
     [CommandName("--help", "-h")]
     public class Help<T> : ICommand
     {
+
+        private ILogger _logger = new ConsoleOutput();
+        private Action<string> _output = Console.WriteLine; 
         private NameBundle NameBundle { get; } = new NameBundle
         {
             Name = "--help",
@@ -24,7 +27,7 @@ namespace CoreCommandLine
 
                 var message = CommandUtilities.GetHelpMessage(childrenTypes);
 
-                Console.WriteLine(message);
+                _output(message);
 
                 context.ApplicationExit = true;
 
@@ -69,6 +72,12 @@ namespace CoreCommandLine
 
         public void SetLogger(ILogger logger)
         {
+            _logger = logger;
+        }
+
+        public void SetOutput(Action<string> output)
+        {
+            _output = output;
         }
     }
 }

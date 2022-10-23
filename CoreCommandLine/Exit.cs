@@ -11,6 +11,8 @@ namespace CoreCommandLine
             if (IsThisSetMyCommand(context, args))
             {
                 context.InteractiveExit = true;
+                
+                Logger.LogInformation("Exiting Interactive application...");
 
                 return true;
             }

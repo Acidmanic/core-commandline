@@ -1,6 +1,5 @@
 using System;
 using Acidmanic.Utilities.Results;
-using CoreCommandLine.Attributes;
 using Microsoft.Extensions.Logging;
 
 namespace CoreCommandLine
@@ -32,11 +31,19 @@ namespace CoreCommandLine
 
         public virtual string Description => GetType().Name;
 
-        protected ILogger Logger { get; private set; }
+        protected ILogger Logger { get; private set; } = new ConsoleOutput();
 
+        protected Action<String> Output { get; private set; } = Console.WriteLine;
+
+        
         public void SetLogger(ILogger logger)
         {
             Logger = logger;
+        }
+
+        public void SetOutput(Action<string> output)
+        {
+            Output = output;
         }
 
         protected Result<CommandArguments> GetCommandArguments(string[] args)

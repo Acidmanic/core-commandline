@@ -1,4 +1,5 @@
 ﻿using  System;
+using Microsoft.Extensions.Logging;
 
 
 namespace CoreCommandLine.Tdd
@@ -7,9 +8,11 @@ namespace CoreCommandLine.Tdd
     {
         static void Main(string[] args)
         {
-            // new ExampleApplication().Execute(args);
+            var app = new ExampleApplication();
+
+            app.Output = s => app.Logger.LogInformation("\n{Text}",s);
             
-            new ExampleApplication().ExecuteInteractive();
+            app.ExecuteInteractive();
         }
     }
 }

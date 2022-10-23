@@ -1,15 +1,21 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Acidmanic.Utilities.Reflection;
 using CoreCommandLine.Attributes;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.LightWeight;
 
 namespace CoreCommandLine
 {
     public abstract class CommandLineApplication
     {
+
+        public ILogger Logger { get; set; } = new ConsoleLogger();
+        
+        public Action<string> Output { get; set; } = Console.WriteLine;
+        
         protected List<Type> GetChildrenTypes(Type type, bool addExit)
         {
             var childrenTypes = new List<Type>();
@@ -93,6 +99,10 @@ namespace CoreCommandLine
 
             if (instance != null && !context.ApplicationExit)
             {
+                instance.SetLogger(Logger);
+                
+                instance.SetOutput(Output);
+                
                 instance.Execute(context, args);
             }
         }
