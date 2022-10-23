@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Acidmanic.Utilities.Reflection;
 using CoreCommandLine.Attributes;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,10 @@ namespace CoreCommandLine
         public ILogger Logger { get; set; } = new ConsoleLogger();
         
         public Action<string> Output { get; set; } = Console.WriteLine;
+
+        public string ApplicationTitle { get; set; } = "Command line Application";
+
+        public string ApplicationDescription { get; set; } = "";
         
         protected List<Type> GetChildrenTypes(Type type, bool addExit)
         {
@@ -58,6 +63,13 @@ namespace CoreCommandLine
         
         public void ExecuteInteractive()
         {
+
+            Output(ApplicationTitle);
+            
+            Output(Line(ApplicationTitle));
+
+            Output(ApplicationDescription);
+            
             var stay = true;
 
             while (stay)
@@ -76,6 +88,25 @@ namespace CoreCommandLine
 
                 stay = !context.InteractiveExit;
             }
+        }
+
+        private string Line(string applicationTitle)
+        {
+            if (string.IsNullOrEmpty(applicationTitle))
+            {
+                return "----------------------";
+            }
+
+            var length = applicationTitle.Length;
+
+            var line = "";
+
+            for (int i=0;i<length; i++)
+            {
+                line += "-";
+            }
+
+            return line;
         }
 
         private void Execute(Type parentType, Context context, string[] args,bool useExitCommand)
