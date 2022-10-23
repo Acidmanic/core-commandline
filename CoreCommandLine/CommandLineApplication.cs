@@ -42,7 +42,9 @@ namespace CoreCommandLine
         public void Execute(string[] args)
         {
             var context = new Context();
-
+            
+            InitializeContext(context);
+            
             var type = this.GetType();
 
             Execute(type, context, args,false);
@@ -55,6 +57,8 @@ namespace CoreCommandLine
             while (stay)
             {
                 var context = new Context();
+
+                InitializeContext(context);
 
                 var type = this.GetType();
 
@@ -91,6 +95,11 @@ namespace CoreCommandLine
             {
                 instance.Execute(context, args);
             }
+        }
+
+        protected virtual void InitializeContext(Context context)
+        {
+            
         }
     }
 }
