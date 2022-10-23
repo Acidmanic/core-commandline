@@ -105,5 +105,25 @@ namespace CoreCommandLine
 
             return false;
         }
+
+        protected bool AmIPresent(string[] args)
+        {
+            return IndexOf(NameBundle, args) > -1;
+        }
+
+        protected Result<string> FindMyValue(string[] args)
+        {
+            var index = IndexOf(NameBundle, args);
+
+            if (index > -1)
+            {
+                if (args.Length > index + 1)
+                {
+                    return new Result<string>(true, args[1]);
+                }
+            }
+
+            return new Result<string>().FailAndDefaultValue();
+        }
     }
 }
