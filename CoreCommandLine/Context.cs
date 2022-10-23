@@ -12,14 +12,15 @@ namespace CoreCommandLine
             {
                 _data.Remove(key);
             }
-            _data.Add(key,value);
+
+            _data.Add(key, value);
         }
 
-        public T Get<T>(string key,T defaultValue) where T : class
+        public T Get<T>(string key, T defaultValue)
         {
             if (_data.ContainsKey(key))
             {
-                return _data[key] as T;
+                return (T)_data[key];
             }
 
             return defaultValue;
