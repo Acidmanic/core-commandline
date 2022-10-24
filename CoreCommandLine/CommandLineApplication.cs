@@ -136,11 +136,23 @@ namespace CoreCommandLine
 
                 instance.SetOutput(Output);
 
+                OnBeforeExecution(context, args, instance);
+
                 instance.Execute(context, args);
+
+                OnAfterExecution(context, args, instance);
             }
         }
 
         protected virtual void InitializeContext(Context context)
+        {
+        }
+
+        protected virtual void OnBeforeExecution(Context context, string[] args, ICommand command)
+        {
+        }
+
+        protected virtual void OnAfterExecution(Context context, string[] args, ICommand command)
         {
         }
     }
