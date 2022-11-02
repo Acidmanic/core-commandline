@@ -21,6 +21,10 @@
       Implement ICommand or Extend CommandBase. Use CommandName attribute to name the command. Use SubCommands attribute to mark next level commands. 
     </Summary>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <Title>CommandLine Library For Dotnet Core </Title>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/Acidmanic/core-commandline</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Acidmanic/core-commandline</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,3 +34,4 @@
   </ItemGroup>
   
 </Project>
+
