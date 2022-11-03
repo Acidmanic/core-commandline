@@ -22,8 +22,7 @@ namespace CoreCommandLine
 
         public static List<Type> GetChildren(this Type commandType)
         {
-            // if (TypeCheck.Implements<ICommand>(commandType))
-            // {
+          
                 var childrenAttribute = 
                     commandType.GetCustomAttributes<SubcommandsAttribute>()
                         .FirstOrDefault();
@@ -31,7 +30,7 @@ namespace CoreCommandLine
                 {
                     return childrenAttribute.Children;
                 }
-            // }
+          
 
             return new List<Type>();
         }
