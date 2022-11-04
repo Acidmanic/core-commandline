@@ -60,3 +60,32 @@ Context
 * ```InteractiveExit```
     * Setting this property inside any command, would close the application when is executed interactively.
     * Usually there is no need to set this manually. When you start your application interactively, and __exit__ command is already added to your commands that would set this property when called. So without any extra coding, you can exit the interactive application just by typing exit.
+
+Command Name And Descriptions
+================
+
+If you implement ```ICommand``` class, then you would have to implement ```Name```  and ```Description``` properties. On the other hand, by extending the ```CommandBase``` class, by default these properties would be set from the class name of the command. but you still are able to __override__ these properties.
+
+
+Application Title - Application Description
+==================
+
+There are ```ApplicationTitle``` and ```ApplicationDescription``` properties in CommandLineApplication class that you can set on instance you create or in the driven class's constructor. These values would be printed when You start your application.
+
+
+Default output
+==============
+
+There is an ```Output``` property in Application command which determines the default output method for console application to print out it's output. The ```Action<string>``` set into this property, would be delivered to all executing commands to use. 
+If you extend ```CommandBase``` class, it's already handled and you can use ```Output("some-string")``` inside your driven class (your command) to write on output.
+And if you implemented the ```ICommand``` interface, this output delegate would be delivered to your code when ```SetOutput(..)``` method of your command is called before execution.
+
+Logging
+==========
+
+In a similar way to ```Output``` property, you can set ```Logger``` property of your application to make use of your logger of interest. This property is of type ```ILogger``` (microsoft's) and can accept any implementation.
+
+
+__NOTE__: Using ___Logger___ or default ___Output___ for printing information towards the user, is up to the developers decision. But the recommended usage would be to use ___Output___ for printing execution results and information. And Use logger only for debugging and development logs.
+    
+
