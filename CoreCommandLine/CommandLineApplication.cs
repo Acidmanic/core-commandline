@@ -211,6 +211,13 @@ namespace CoreCommandLine
         }
 
 
+        public CommandLineApplication UseDotnetResolver(IServiceProvider serviceProvider)
+        {
+            Resolver = new DotnetServiceProviderResolver(serviceProvider);
+
+            return this;
+        }
+        
         protected ICommand ResolveCommand(Type type)
         {
             ICommand command = null;
