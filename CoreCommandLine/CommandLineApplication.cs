@@ -6,6 +6,7 @@ using System.Text;
 using Acidmanic.Utilities.Reflection;
 using Acidmanic.Utilities.Results;
 using CoreCommandLine.Attributes;
+using CoreCommandLine.Di;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.LightWeight;
 
@@ -24,6 +25,9 @@ namespace CoreCommandLine
 
         private readonly List<Type> _applicationSubCommands;
 
+        private IResolver Resolver { get; set; } = new NullResolver();
+        
+        
 
         public CommandLineApplication()
         {
@@ -194,7 +198,7 @@ namespace CoreCommandLine
                 Execute(childType, context, args, useExitCommand);
             }
 
-            var instance = new ObjectInstantiator().BlindInstantiate(parentType) as ICommand;
+            var instance = ResolveCommand(parentType);
 
             if (instance != null && !context.ApplicationExit)
             {
@@ -204,6 +208,24 @@ namespace CoreCommandLine
 
                 instance.Execute(context, args);
             }
+        }
+
+
+        protected ICommand ResolveCommand(Type type)
+        {
+            ICommand command = null;
+
+            if (Resolver != null)
+            {
+                command = Resolver.Resolve(type) as ICommand;
+            }
+
+            if (command == null)
+            {
+                command = new ObjectInstantiator().BlindInstantiate(type) as ICommand;
+            }
+
+            return command;
         }
 
         protected virtual void InitializeContext(Context context)
