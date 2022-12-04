@@ -14,9 +14,9 @@ namespace CoreCommandLine
 
             foreach (var childType in childrenTypes)
             {
-                var child = new ObjectInstantiator().BlindInstantiate(childType) as ICommand;
+                var child = CommandInstantiator.Instance.Instantiate(childType);
 
-                if (child != null)
+                if (child)
                 {
                     var nameBundle = childType.GetCommandName();
 
@@ -29,7 +29,7 @@ namespace CoreCommandLine
                             line += " | " + nameBundle.Value.ShortName;
                         }
 
-                        line += "\t" + child.Description;
+                        line += "\t" + child.Value.Description;
 
                         message += line + "\n";
                     }

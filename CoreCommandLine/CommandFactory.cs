@@ -53,12 +53,11 @@ namespace CoreCommandLine
                     {
                         if (AreNamesEqual(foundName.Value, name))
                         {
-                            var instance = 
-                                new ObjectInstantiator()
-                                .BlindInstantiate(child);
-                            if (instance is ICommand command)
+                            var instance = CommandInstantiator.Instance.Instantiate(child);
+                            
+                            if (instance)
                             {
-                                return command;
+                                return instance.Value;
                             }
                         }
                     }

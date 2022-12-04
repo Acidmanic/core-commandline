@@ -25,7 +25,11 @@ namespace CoreCommandLine
 
         private readonly List<Type> _applicationSubCommands;
 
-        private IResolver Resolver { get; set; } = new NullResolver();
+        private IResolver Resolver
+        {
+            get => CommandInstantiator.Instance.Resolver;
+            set => CommandInstantiator.Instance.UseResolver(value);
+        }
         
         
         public CommandLineApplication()
@@ -197,43 +201,27 @@ namespace CoreCommandLine
                 Execute(childType, context, args, useExitCommand);
             }
 
-            var instance = ResolveCommand(parentType);
+            var instance = CommandInstantiator.Instance.Instantiate(parentType);
 
-            if (instance != null && !context.ApplicationExit)
+            if (instance && !context.ApplicationExit)
             {
-                instance.SetLogger(Logger);
+                instance.Value.SetLogger(Logger);
 
-                instance.SetOutput(Output);
+                instance.Value.SetOutput(Output);
 
-                instance.Execute(context, args);
+                instance.Value.Execute(context, args);
             }
         }
 
 
         public CommandLineApplication UseDotnetResolver(IServiceProvider serviceProvider)
         {
-            Resolver = new DotnetServiceProviderResolver(serviceProvider);
+            CommandInstantiator.Instance.UseResolver(new DotnetServiceProviderResolver(serviceProvider));
 
             return this;
         }
         
-        protected ICommand ResolveCommand(Type type)
-        {
-            ICommand command = null;
-
-            if (Resolver != null)
-            {
-                command = Resolver.Resolve(type) as ICommand;
-            }
-
-            if (command == null)
-            {
-                command = new ObjectInstantiator().BlindInstantiate(type) as ICommand;
-            }
-
-            return command;
-        }
-
+       
         protected virtual void InitializeContext(Context context)
         {
         }
