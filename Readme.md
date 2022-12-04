@@ -102,6 +102,14 @@ of your ```IResolver```.
 by doing so, you can deliver your registered services to your commands by conventional 
 constructor injection easily.
 
+
+__NOTE__: In most of ioc/di implementations, you need to register any thing which at some point 
+is supposed to be resolved. since commands with constructor parameters are also being 
+resolved using your resolver, it's so important to __REMEMBER TO REGISTER COMMANDS ON YOUR DI REGISTRY__. 
+other-wise your commands would not be resolved with resolver, also since they have constructor parameters, 
+they would not be instantiated without a resolver and therefore they will not work.
+
+
 __NOTE__: If you use dotnet's builtin di system, you can just simply call ```application.UseDotnetResolver(serviceProvider)``` 
 passing an instance of dotnet's ```IServiceProvider``` to it.
 

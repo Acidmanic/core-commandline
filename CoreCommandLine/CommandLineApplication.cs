@@ -28,7 +28,6 @@ namespace CoreCommandLine
         private IResolver Resolver { get; set; } = new NullResolver();
         
         
-
         public CommandLineApplication()
         {
             _applicationSubCommands = GetChildrenTypes(this.GetType(), true);
