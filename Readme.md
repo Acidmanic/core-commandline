@@ -36,6 +36,8 @@ Features
 * Nested commands (Each command can have its own sub-commands and so on...)
 * Auto generated Help command for each command
 * Can be started as a regular console application OR interactively
+* Supports Dependency Injection
+
 
 
 Nested Commands
@@ -88,4 +90,18 @@ In a similar way to ```Output``` property, you can set ```Logger``` property of 
 
 __NOTE__: Using ___Logger___ or default ___Output___ for printing information towards the user, is up to the developers decision. But the recommended usage would be to use ___Output___ for printing execution results and information. And Use logger only for debugging and development logs.
     
+
+Dependency Injection
+==================
+
+To make use of any kind of dependency injection, you just need to provide a 
+facade of your di/ioc resolver by implementing ```IResolver```. Then you can 
+connect your di/ioc by setting the Application's Resolver property to an instance 
+of your ```IResolver```. 
+
+by doing so, you can deliver your registered services to your commands by conventional 
+constructor injection easily.
+
+__NOTE__: If you use dotnet's builtin di system, you can just simply call ```application.UseDotnetResolver(serviceProvider)``` 
+passing an instance of dotnet's ```IServiceProvider``` to it.
 
