@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using Acidmanic.Utilities.Reflection;
 using Acidmanic.Utilities.Results;
 using CoreCommandLine.Attributes;
 using CoreCommandLine.Di;
@@ -12,7 +10,7 @@ using Microsoft.Extensions.Logging.LightWeight;
 
 namespace CoreCommandLine
 {
-    public abstract class CommandLineApplication
+    public class CommandLineApplication
     {
         public ILogger Logger { get; set; } = new ConsoleLogger();
 
@@ -25,10 +23,10 @@ namespace CoreCommandLine
 
         private readonly List<Type> _applicationSubCommands;
 
-        private IResolver Resolver
+        protected IResolver Resolver
         {
             get => CommandInstantiator.Instance.Resolver;
-            set => CommandInstantiator.Instance.UseResolver(value);
+            private set => CommandInstantiator.Instance.UseResolver(value);
         }
         
         

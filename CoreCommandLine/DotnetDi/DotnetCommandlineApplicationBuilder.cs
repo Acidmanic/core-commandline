@@ -7,6 +7,10 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CoreCommandLine.DotnetDi
 {
+    public class DotnetCommandlineApplicationBuilder : DotnetCommandlineApplicationBuilder<CommandLineApplication>
+    {
+        
+    }
     public class DotnetCommandlineApplicationBuilder<TApplication> where TApplication : CommandLineApplication, new()
     {
         private readonly List<Type> _startupTypes;
