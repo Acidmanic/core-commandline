@@ -1,11 +1,10 @@
-﻿using System;
-using CoreCommandLine.Example.Di.Commands;
-using CoreCommandLine.Example.Di.Contracts;
-using CoreCommandLine.Example.Di.Services;
+﻿using Example.Di.Commands;
+using Example.Di.Contracts;
+using Example.Di.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.LightWeight;
 
-namespace CoreCommandLine.Example.Di
+namespace Example.Di
 {
     class Program
     {

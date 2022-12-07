@@ -1,8 +1,9 @@
+using CoreCommandLine;
 using CoreCommandLine.Attributes;
-using CoreCommandLine.Example.Di.Contracts;
+using Example.Di.Contracts;
 using Microsoft.Extensions.Logging;
 
-namespace CoreCommandLine.Example.Di.Commands
+namespace Example.Di.Commands
 {
     
     

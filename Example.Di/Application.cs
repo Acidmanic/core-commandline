@@ -1,7 +1,8 @@
+using CoreCommandLine;
 using CoreCommandLine.Attributes;
-using CoreCommandLine.Example.Di.Commands;
+using Example.Di.Commands;
 
-namespace CoreCommandLine.Example.Di
+namespace Example.Di
 {
     [Subcommands(typeof(Echo))]
     public class Application:CommandLineApplication

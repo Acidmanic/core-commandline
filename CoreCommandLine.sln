@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreCommandLine", "CoreComm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreCommandLine.Tdd", "CoreCommandLine.Tdd\CoreCommandLine.Tdd.csproj", "{46A62EF8-AA58-474D-B161-6940AD2C399F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreCommandLine.Example.Di", "CoreCommandLine.Example.Di\CoreCommandLine.Example.Di.csproj", "{1B35B31D-BFD4-40D6-95CE-41990514764C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example.Di", "Example.Di\Example.Di.csproj", "{1B35B31D-BFD4-40D6-95CE-41990514764C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example.DotnetDi", "Example.DotnetDi\Example.DotnetDi.csproj", "{DE82EB44-D2F8-4CB0-B081-F0000F6A5521}"
 EndProject

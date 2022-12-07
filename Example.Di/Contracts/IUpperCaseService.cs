@@ -1,4 +1,4 @@
-namespace CoreCommandLine.Example.Di.Contracts
+namespace Example.Di.Contracts
 {
     public interface IUpperCaseService
     {

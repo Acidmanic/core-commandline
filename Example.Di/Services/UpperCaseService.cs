@@ -1,6 +1,6 @@
-using CoreCommandLine.Example.Di.Contracts;
+using Example.Di.Contracts;
 
-namespace CoreCommandLine.Example.Di.Services
+namespace Example.Di.Services
 {
     public class UpperCaseService:IUpperCaseService
     {
