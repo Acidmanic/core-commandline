@@ -11,15 +11,13 @@ namespace CoreCommandLine.DotnetDi
     {
         private readonly List<Type> _startupTypes;
         private ILogger _logger;
-        private string _description;
-        private string _title;
+        private string _description=null;
+        private string _title=null;
 
         public DotnetCommandlineApplicationBuilder()
         {
             _startupTypes = new List<Type>();
             _logger = NullLogger.Instance;
-            _description = "Commandline application";
-            _title = typeof(TApplication).Name;
         }
 
         /// <summary>
@@ -61,14 +59,15 @@ namespace CoreCommandLine.DotnetDi
             var serviceCollection = new ServiceCollection();
 
             serviceCollection.AddSingleton(_logger);
-            
-            invokers.ForEach(i => i.InvokeSatisfiedMethods<IServiceCollection,ILogger>(serviceCollection,_logger));
+
+            invokers.ForEach(i => i.InvokeSatisfiedMethods<IServiceCollection, ILogger>(serviceCollection, _logger));
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             var resolver = new DotnetServiceProviderResolver(serviceProvider);
-            
-            invokers.ForEach(i => i.InvokeSatisfiedMethods<IServiceProvider,IResolver,ILogger>(serviceProvider,resolver,_logger));
+
+            invokers.ForEach(i =>
+                i.InvokeSatisfiedMethods<IServiceProvider, IResolver, ILogger>(serviceProvider, resolver, _logger));
 
             var application = new TApplication();
 
@@ -76,10 +75,10 @@ namespace CoreCommandLine.DotnetDi
 
             application.Logger = _logger;
 
-            application.ApplicationDescription = _description;
+            application.ApplicationDescription = _description ?? application.ApplicationDescription;
 
-            application.ApplicationTitle = _title;
-            
+            application.ApplicationTitle = _title ?? application.ApplicationTitle;
+
             application.Output = Console.WriteLine;
 
             return application;
@@ -95,6 +94,13 @@ namespace CoreCommandLine.DotnetDi
                 {
                     var invoker = new MethodInvoker(startupType);
 
+                    invoker.AddFilter(method =>
+                    {
+                        var lowerName = method.Name.ToLower();
+                        return lowerName.StartsWith("configure") ||
+                               lowerName.StartsWith("register");
+                    });
+                    
                     invokers.Add(invoker);
                 }
                 catch (Exception _)
@@ -112,25 +118,27 @@ namespace CoreCommandLine.DotnetDi
 
             return this;
         }
+
         public DotnetCommandlineApplicationBuilder<TApplication> Description(string description)
         {
             _description = description;
 
             return this;
         }
+
         public DotnetCommandlineApplicationBuilder<TApplication> Describe(string title, string description)
         {
             _description = description;
 
             _title = title;
-            
+
             return this;
         }
-        
+
         public DotnetCommandlineApplicationBuilder<TApplication> UseLogger(ILogger logger)
         {
             _logger = logger;
-            
+
             return this;
         }
     }

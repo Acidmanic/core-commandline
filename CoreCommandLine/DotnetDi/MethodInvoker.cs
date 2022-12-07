@@ -11,6 +11,7 @@ namespace CoreCommandLine.DotnetDi
         protected readonly Type TargetType;
         protected readonly object TargetObject;
         protected readonly string TargetName;
+        protected readonly List<Func<MethodInfo, bool>> _filters;
 
         public MethodInvoker(Type targetType)
         {
@@ -19,6 +20,10 @@ namespace CoreCommandLine.DotnetDi
             TargetName = TargetType.Name;
 
             TargetObject = InstantiateStartupClass();
+
+            _filters = new List<Func<MethodInfo, bool>>();
+
+            _filters.Add(m => true);
         }
 
         protected object InstantiateStartupClass()
@@ -50,6 +55,15 @@ namespace CoreCommandLine.DotnetDi
             return types;
         }
 
+        /// <summary>
+        /// Adding filters allow you pass only methods you want to be executed.
+        /// </summary>
+        /// <param name="filter">A filter delegate, returns true when it accepts the method. and false otherwise.</param>
+        public void AddFilter(Func<MethodInfo, bool> filter)
+        {
+            _filters.Add(filter);
+        }
+
         public void InvokeMatchingMethods(params object[] arguments)
         {
             var types = CorrespondingTypes(arguments);
@@ -62,37 +76,39 @@ namespace CoreCommandLine.DotnetDi
         public void InvokeMatchingMethods<TArgument>(TArgument firstArgument)
         {
             var types = new Type[] { typeof(TArgument) };
-            
+
             var consumers = FindConsumers(types, Matches);
 
-            consumers.ForEach(m => InvokeFeedDirectly(m, TargetObject, new object[]{firstArgument}));
+            consumers.ForEach(m => InvokeFeedDirectly(m, TargetObject, new object[] { firstArgument }));
         }
-        
-        public void InvokeMatchingMethods<TArg1,TArg2>(TArg1 arg1,TArg2 arg2)
+
+        public void InvokeMatchingMethods<TArg1, TArg2>(TArg1 arg1, TArg2 arg2)
         {
-            var types = new Type[] { typeof(TArg1) ,typeof(TArg2)};
-            
+            var types = new Type[] { typeof(TArg1), typeof(TArg2) };
+
             var consumers = FindConsumers(types, Matches);
 
-            consumers.ForEach(m => InvokeFeedDirectly(m, TargetObject, new object[]{arg1,arg2}));
+            consumers.ForEach(m => InvokeFeedDirectly(m, TargetObject, new object[] { arg1, arg2 }));
         }
-        
-        public void InvokeMatchingMethods<TArg1,TArg2,TArg3>(TArg1 arg1,TArg2 arg2,TArg3 arg3)
+
+        public void InvokeMatchingMethods<TArg1, TArg2, TArg3>(TArg1 arg1, TArg2 arg2, TArg3 arg3)
         {
-            var types = new Type[] { typeof(TArg1) ,typeof(TArg2),typeof(TArg3)};
-            
+            var types = new Type[] { typeof(TArg1), typeof(TArg2), typeof(TArg3) };
+
             var consumers = FindConsumers(types, Matches);
 
-            consumers.ForEach(m => InvokeFeedDirectly(m, TargetObject, new object[]{arg1,arg2,arg3}));
+            consumers.ForEach(m => InvokeFeedDirectly(m, TargetObject, new object[] { arg1, arg2, arg3 }));
         }
-        public void InvokeMatchingMethods<TArg1,TArg2,TArg3,TArg4>(TArg1 arg1,TArg2 arg2,TArg3 arg3,TArg4 arg4)
+
+        public void InvokeMatchingMethods<TArg1, TArg2, TArg3, TArg4>(TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4)
         {
-            var types = new Type[] { typeof(TArg1) ,typeof(TArg2),typeof(TArg3),typeof(TArg4)};
-            
+            var types = new Type[] { typeof(TArg1), typeof(TArg2), typeof(TArg3), typeof(TArg4) };
+
             var consumers = FindConsumers(types, Matches);
 
-            consumers.ForEach(m => InvokeFeedDirectly(m, TargetObject, new object[]{arg1,arg2,arg3,arg4}));
+            consumers.ForEach(m => InvokeFeedDirectly(m, TargetObject, new object[] { arg1, arg2, arg3, arg4 }));
         }
+
         public void InvokeSatisfiedMethods(params object[] arguments)
         {
             var types = CorrespondingTypes(arguments);
@@ -105,39 +121,54 @@ namespace CoreCommandLine.DotnetDi
         public void InvokeSatisfiedMethods<TArgument>(TArgument firstArgument)
         {
             var types = new Type[] { typeof(TArgument) };
-            
+
             var consumers = FindConsumers(types, Satisfies);
 
-            consumers.ForEach(m => InvokeFeedAvailable(m, TargetObject, new object[]{firstArgument}));
+            consumers.ForEach(m => InvokeFeedAvailable(m, TargetObject, new object[] { firstArgument }));
+        }
+
+        public void InvokeSatisfiedMethods<TArg1, TArg2>(TArg1 arg1, TArg2 arg2)
+        {
+            var types = new Type[] { typeof(TArg1), typeof(TArg2) };
+
+            var consumers = FindConsumers(types, Satisfies);
+
+            consumers.ForEach(m => InvokeFeedAvailable(m, TargetObject, new object[] { arg1, arg2 }));
+        }
+
+        public void InvokeSatisfiedMethods<TArg1, TArg2, TArg3>(TArg1 arg1, TArg2 arg2, TArg3 arg3)
+        {
+            var types = new Type[] { typeof(TArg1), typeof(TArg2), typeof(TArg3) };
+
+            var consumers = FindConsumers(types, Satisfies);
+
+            consumers.ForEach(m => InvokeFeedAvailable(m, TargetObject, new object[] { arg1, arg2, arg3 }));
+        }
+
+        public void InvokeSatisfiedMethods<TArg1, TArg2, TArg3, TArg4>(TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4)
+        {
+            var types = new Type[] { typeof(TArg1), typeof(TArg2), typeof(TArg3), typeof(TArg4) };
+
+            var consumers = FindConsumers(types, Satisfies);
+
+            consumers.ForEach(m => InvokeFeedAvailable(m, TargetObject, new object[] { arg1, arg2, arg3, arg4 }));
+        }
+
+
+        private bool PassesTheFilters(MethodInfo methodInfo)
+        {
+
+            foreach (var filterPass in _filters)
+            {
+                if (!filterPass(methodInfo))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
         
-        public void InvokeSatisfiedMethods<TArg1,TArg2>(TArg1 arg1,TArg2 arg2)
-        {
-            var types = new Type[] { typeof(TArg1) ,typeof(TArg2)};
-            
-            var consumers = FindConsumers(types, Satisfies);
-
-            consumers.ForEach(m => InvokeFeedAvailable(m, TargetObject, new object[]{arg1,arg2}));
-        }
-        
-        public void InvokeSatisfiedMethods<TArg1,TArg2,TArg3>(TArg1 arg1,TArg2 arg2,TArg3 arg3)
-        {
-            var types = new Type[] { typeof(TArg1) ,typeof(TArg2),typeof(TArg3)};
-            
-            var consumers = FindConsumers(types, Satisfies);
-
-            consumers.ForEach(m => InvokeFeedAvailable(m, TargetObject, new object[]{arg1,arg2,arg3}));
-        }
-        public void InvokeSatisfiedMethods<TArg1,TArg2,TArg3,TArg4>(TArg1 arg1,TArg2 arg2,TArg3 arg3,TArg4 arg4)
-        {
-            var types = new Type[] { typeof(TArg1) ,typeof(TArg2),typeof(TArg3),typeof(TArg4)};
-            
-            var consumers = FindConsumers(types, Satisfies);
-
-            consumers.ForEach(m => InvokeFeedAvailable(m, TargetObject, new object[]{arg1,arg2,arg3,arg4}));
-        }
-
-       
         private List<MethodInfo> FindConsumers(Type[] types, Func<ParameterInfo[], Type[], bool> selector)
         {
             var methods = TargetType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic |
@@ -149,11 +180,14 @@ namespace CoreCommandLine.DotnetDi
             {
                 if (!method.IsAbstract && !method.IsStatic && !method.IsGenericMethod)
                 {
-                    var parameters = method.GetParameters();
-
-                    if (selector(parameters, types))
+                    if (PassesTheFilters(method))
                     {
-                        consumers.Add(method);
+                        var parameters = method.GetParameters();
+
+                        if (selector(parameters, types))
+                        {
+                            consumers.Add(method);
+                        }   
                     }
                 }
             }
@@ -216,6 +250,14 @@ namespace CoreCommandLine.DotnetDi
                 return false;
             }
 
+            foreach (var parameter in parameters)
+            {
+                if (!types.Contains(parameter.ParameterType))
+                {
+                    return false;
+                }
+            }
+
             return true;
         }
 
@@ -267,7 +309,7 @@ namespace CoreCommandLine.DotnetDi
                 return false;
             }
 
-            return o.GetType() == parameter.ParameterType;
+            return parameter.ParameterType.IsAssignableFrom(o.GetType());
         }
     }
 
