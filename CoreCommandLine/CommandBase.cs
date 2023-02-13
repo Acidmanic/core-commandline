@@ -113,13 +113,15 @@ namespace CoreCommandLine
 
         protected Result<string> FindMyValue(string[] args)
         {
-            var index = IndexOf(NameBundle, args);
+            var keyIndex = IndexOf(NameBundle, args);
 
-            if (index > -1)
+            if (keyIndex > -1)
             {
-                if (args.Length > index + 1)
+                var valueIndex = keyIndex + 1;
+                
+                if (args.Length > valueIndex)
                 {
-                    return new Result<string>(true, args[1]);
+                    return new Result<string>(true, args[valueIndex]);
                 }
             }
 
