@@ -110,12 +110,28 @@ namespace CoreCommandLine
         /// </returns>
         protected bool IsThisSetMyCommand(Context context, string[] args)
         {
+            return IsThisSetMyCommand(context, args, c => { });
+        }
+
+        /// <summary>
+        /// Determines if the given string[]args starts with current commands. It the answer is correct, it will
+        /// run the given matchAction.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="args">input arguments to be processed</param>
+        /// <returns>
+        /// True if this set of inputs should result in execution of current command. Otherwise returns False.
+        /// </returns>
+        protected bool IsThisSetMyCommand(Context context, string[] args, Action<CommandArguments> matchAction)
+        {
             var arguments = GetCommandArguments(args);
 
             if (arguments)
             {
                 if (AreNamesEqual(NameBundle, arguments.Value.Command))
                 {
+                    matchAction(arguments.Value);
+
                     return true;
                 }
             }
@@ -139,7 +155,7 @@ namespace CoreCommandLine
         /// </summary>
         /// <param name="args">input arguments to be processed</param>
         /// <returns>Successful Result containing the found value. Otherwise returns a Failure Result.</returns>
-        private Result<string> FindMyValue(string[] args)
+        protected Result<string> FindMyValue(string[] args)
         {
             var index = IndexOf(NameBundle, args);
 
