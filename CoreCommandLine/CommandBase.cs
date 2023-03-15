@@ -139,18 +139,13 @@ namespace CoreCommandLine
         /// </summary>
         /// <param name="args">input arguments to be processed</param>
         /// <returns>Successful Result containing the found value. Otherwise returns a Failure Result.</returns>
-        protected Result<string> FindMyValue(string[] args)
+        private Result<string> FindMyValue(string[] args)
         {
-            var keyIndex = IndexOf(NameBundle, args);
+            var index = IndexOf(NameBundle, args);
 
-            if (keyIndex > -1)
+            if (index > 0 && index < args.Length - 1)
             {
-                var valueIndex = keyIndex + 1;
-
-                if (args.Length > valueIndex)
-                {
-                    return new Result<string>(true, args[valueIndex]);
-                }
+                return new Result<string>(true, args[index + 1]);
             }
 
             return new Result<string>().FailAndDefaultValue();
