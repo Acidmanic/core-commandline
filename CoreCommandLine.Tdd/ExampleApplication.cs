@@ -5,7 +5,7 @@ using CoreCommandLine.Tdd.Commands;
 namespace CoreCommandLine.Tdd
 {
     
-    [Subcommands(typeof(Hello),typeof(World))]
+    [Subcommands(typeof(Hello),typeof(World),typeof(Echo))]
     public class ExampleApplication:CommandLineApplication
     {
         protected override void OnBeforeExecution(Context context, string[] args, ICommand command)

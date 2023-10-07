@@ -70,7 +70,7 @@ namespace CoreCommandLine.DotnetDi
 
             var resolver = new DotnetServiceProviderResolver(serviceProvider);
 
-            serviceCollection.AddTransient<IResolver>(sp => resolver);
+            serviceCollection.AddTransient<IResolver>(sp => new DotnetServiceProviderResolver(sp));
 
             invokers.ForEach(i =>
                 i.InvokeSatisfiedMethods<IServiceProvider, IResolver, ILogger>(serviceProvider, resolver, _logger));

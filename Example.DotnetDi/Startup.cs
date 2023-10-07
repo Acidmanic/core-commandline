@@ -1,4 +1,5 @@
 using System;
+using CoreCommandLine.Di;
 using Example.DotnetDi.Commands;
 using Example.DotnetDi.Contracts;
 using Example.DotnetDi.Services;
@@ -24,6 +25,7 @@ namespace Example.DotnetDi
         {
             logger.LogInformation("I Have a provider: {Provider} " +
                                   " but nothing configure with it!",provider);
+
         }
     }
 }
