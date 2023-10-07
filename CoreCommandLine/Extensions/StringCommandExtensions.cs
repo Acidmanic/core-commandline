@@ -81,6 +81,8 @@ namespace CoreCommandLine.Extensions
                 }
             }
 
+            deliver();
+            
             return segments.ToArray();
         }
     }
