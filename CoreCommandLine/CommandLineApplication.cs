@@ -5,6 +5,7 @@ using System.Reflection;
 using Acidmanic.Utilities.Results;
 using CoreCommandLine.Attributes;
 using CoreCommandLine.Di;
+using CoreCommandLine.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.LightWeight;
 
@@ -121,7 +122,7 @@ namespace CoreCommandLine
 
                 string line = Console.ReadLine();
 
-                var args = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+                var args = line.SplitToArgs();
 
                 WrapExecute(type, context, args, true);
 
