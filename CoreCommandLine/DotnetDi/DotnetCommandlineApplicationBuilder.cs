@@ -1,6 +1,5 @@
-using System;
-using System.Collections.Generic;
 using CoreCommandLine.Di;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -9,19 +8,21 @@ namespace CoreCommandLine.DotnetDi
 {
     public class DotnetCommandlineApplicationBuilder : DotnetCommandlineApplicationBuilder<CommandLineApplication>
     {
-        
     }
+
     public class DotnetCommandlineApplicationBuilder<TApplication> where TApplication : CommandLineApplication, new()
     {
-        private readonly List<Type> _startupTypes;
+        private readonly List<Type> _startupTypes = [];
         private ILogger _logger;
-        private string _description=null;
-        private string _title=null;
+        private string _description = null;
+        private string _title = null;
+        private readonly ServiceCollectorProxy _services = new ServiceCollectorProxy();
+        private IConfigurationBuilder configurationBuilder;
+
 
         public DotnetCommandlineApplicationBuilder()
         {
-            _startupTypes = new List<Type>();
-            _logger = NullLogger.Instance;
+            Clear();
         }
 
         /// <summary>
@@ -60,9 +61,13 @@ namespace CoreCommandLine.DotnetDi
         {
             var invokers = CreateMethodInvokers();
 
-            var serviceCollection = new ServiceCollection();
+            var serviceCollection = _services.BuildServiceCollection();
+
+            var configuration = configurationBuilder.Build();
 
             serviceCollection.AddSingleton(_logger);
+
+            serviceCollection.AddSingleton(configuration);
 
             invokers.ForEach(i => i.InvokeSatisfiedMethods<IServiceCollection, ILogger>(serviceCollection, _logger));
 
@@ -106,7 +111,7 @@ namespace CoreCommandLine.DotnetDi
                         return lowerName.StartsWith("configure") ||
                                lowerName.StartsWith("register");
                     });
-                    
+
                     invokers.Add(invoker);
                 }
                 catch (Exception _)
@@ -147,5 +152,41 @@ namespace CoreCommandLine.DotnetDi
 
             return this;
         }
+
+        /// <summary>
+        /// Resets the builder for creating new instances
+        /// </summary>
+        public void Clear()
+        {
+            _services.Clear();
+            createDefaultConfigurationBuilder();
+            _startupTypes.Clear();
+            _logger = NullLogger.Instance;
+        }
+
+        public IServiceCollection Services => _services;
+
+        private void createDefaultConfigurationBuilder(string[]? args = null)
+        {
+            
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            
+            configurationBuilder = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .AddCommandLine(args ?? []);
+
+            if (environment is { } e)
+            {
+                var configurationFile = $"appsettings.{e}.json";
+
+                if (File.Exists(configurationFile))
+                {
+                    configurationBuilder.AddJsonFile(configurationFile);
+                }
+            }
+        }
+
+        public IConfigurationBuilder ConfigurationBuilder => configurationBuilder;
     }
 }
