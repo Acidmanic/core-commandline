@@ -32,9 +32,18 @@ namespace CoreCommandLine
         
         }
 
-        public ICommand Make(string name,Type caller)
+        public ICommand Make(string name,Type caller, List<Type> applicationSubCommands)
         {
-            var children = caller.GetChildren();
+            List<Type> children;
+            
+            if (TypeCheck.Extends<CommandLineApplication>(caller))
+            {
+                children = applicationSubCommands;
+            }
+            else
+            {
+                children = caller.GetChildren();
+            }
 
             return Make(name, children);
         }

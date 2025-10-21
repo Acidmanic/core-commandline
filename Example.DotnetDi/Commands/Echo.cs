@@ -5,12 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Example.DotnetDi.Commands
 {
-    
-    
-    [CommandName("echo","-e")]
-    public class Echo:CommandBase
+    [RootCommand]
+    [CommandName("echo", "-e")]
+    public class Echo : CommandBase
     {
-
         private readonly IUpperCaseService _upperCaseService;
         private readonly IAddDateService _addDateService;
 
@@ -36,11 +34,12 @@ namespace Example.DotnetDi.Commands
 
                 var upper = _upperCaseService.ToUpper(echoString);
                 var dated = _addDateService.AddDate(echoString);
-                
-                Logger.LogInformation("Original: {Value}",echoString);
-                Logger.LogInformation("UpperCase: {Value}",upper);
-                Logger.LogInformation("WithDate: {Value}",dated);
+
+                Logger.LogInformation("Original: {Value}", echoString);
+                Logger.LogInformation("UpperCase: {Value}", upper);
+                Logger.LogInformation("WithDate: {Value}", dated);
             }
+
             // I was not present
             return false;
         }

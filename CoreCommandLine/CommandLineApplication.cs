@@ -1,7 +1,9 @@
 using System.Reflection;
+using Acidmanic.Utilities.Reflection;
 using Acidmanic.Utilities.Results;
 using CoreCommandLine.Attributes;
 using CoreCommandLine.Di;
+using CoreCommandLine.Dtos;
 using CoreCommandLine.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.LightWeight;
@@ -10,27 +12,43 @@ namespace CoreCommandLine
 {
     public class CommandLineApplication
     {
-        public ILogger Logger { get; set; } = new ConsoleLogger();
-
-        public Action<string> Output { get; set; } = Console.WriteLine;
+        public ILogger Logger { get; internal set; } = new ConsoleLogger();
 
         public string ApplicationTitle { get; set; } = "Command line Application";
 
         public string ApplicationDescription { get; set; } = "";
 
-
         private readonly List<Type> _applicationSubCommands;
+
+        internal Action<ExecutionActionAssets> BeforeExecute { get; set; } = _ => { };
+
+        internal Action<ExecutionActionAssets> AfterExecute { get; set; } = _ => { };
+
 
         public IResolver Resolver
         {
             get => CommandInstantiator.Instance.Resolver;
             private set => CommandInstantiator.Instance.UseResolver(value);
         }
-        
-        
-        public CommandLineApplication()
+
+
+        public CommandLineApplication(List<Assembly> assemblies)
         {
-            _applicationSubCommands = GetChildrenTypes(this.GetType(), true);
+            _applicationSubCommands = extractRootCommands(assemblies);
+        }
+
+
+        private List<Type> extractRootCommands(List<Assembly> assemblies)
+        {
+            var typeCenter = Acidmanic.Utilities.Reflection.TypeCenter.TypeCenterService.Make();
+
+            assemblies.ForEach(a => typeCenter.Cache(a));
+
+            var rootCommands = typeCenter.GetTypesWhichExtend<CommandBase>().Where(t => t.GetCustomAttributes().Any(a => a is RootCommandAttribute))
+                .Distinct()
+                .ToList();
+
+            return rootCommands;
         }
 
 
@@ -60,6 +78,13 @@ namespace CoreCommandLine
         protected List<Type> GetChildrenTypes(Type type, bool addExit)
         {
             var childrenTypes = new List<Type>();
+
+            var commandLineApplicationType = typeof(CommandLineApplication);
+            
+            if (commandLineApplicationType == type ||  type.IsSubclassOf(commandLineApplicationType))
+            {
+                childrenTypes.AddRange(_applicationSubCommands);
+            }
 
             var childrenAttribute = type.GetCustomAttributes<SubcommandsAttribute>(true).FirstOrDefault();
 
@@ -99,13 +124,13 @@ namespace CoreCommandLine
 
         public void ExecuteInteractive()
         {
-            Output(ApplicationTitle);
+            Logger.LogInformation(ApplicationTitle);
 
-            Output(Line(ApplicationTitle, 15));
+            Logger.LogInformation(Line(ApplicationTitle, 15));
 
-            Output(ApplicationDescription);
+            Logger.LogInformation(ApplicationDescription);
 
-            Output(Line(ApplicationDescription, 0));
+            Logger.LogInformation(Line(ApplicationDescription, 0));
 
             var stay = true;
 
@@ -150,7 +175,7 @@ namespace CoreCommandLine
         {
             if (args != null && args.Length > 0)
             {
-                var command = CommandFactory.Instance.Make(args[0], this.GetType());
+                var command = CommandFactory.Instance.Make(args[0], this.GetType(),_applicationSubCommands);
 
                 if (command != null && command.GetType() != typeof(NullCommand))
                 {
@@ -167,14 +192,14 @@ namespace CoreCommandLine
 
             if (foundCommand)
             {
-                OnBeforeExecution(context,args,foundCommand.Value);
+                BeforeExecute(new ExecutionActionAssets(context, args, foundCommand.Value, this));
             }
-            
+
             Execute(type, context, args, useExitCommand);
-            
+
             if (foundCommand)
             {
-                OnAfterExecution(context,args,foundCommand.Value);
+                AfterExecute(new ExecutionActionAssets(context, args, foundCommand.Value, this));
             }
         }
 
@@ -203,40 +228,12 @@ namespace CoreCommandLine
             {
                 instance.Value.SetLogger(Logger);
 
-                instance.Value.SetOutput(Output);
-
                 instance.Value.Execute(context, args);
             }
         }
-
-
-        public CommandLineApplication UseDotnetResolver(IServiceProvider serviceProvider)
-        {
-            CommandInstantiator.Instance.UseResolver(new DotnetServiceProviderResolver(serviceProvider));
-
-            return this;
-        }
         
-        public CommandLineApplication UseResolver(IResolver resolver)
-        {
-            CommandInstantiator.Instance.UseResolver(resolver);
-
-            return this;
-        }
-        
-       
         protected virtual void InitializeContext(Context context)
         {
         }
-
-        protected virtual void OnBeforeExecution(Context context, string[] args, ICommand command)
-        {
-        }
-
-        protected virtual void OnAfterExecution(Context context, string[] args, ICommand command)
-        {
-        }
-        
-        
     }
 }

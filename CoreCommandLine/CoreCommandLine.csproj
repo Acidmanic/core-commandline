@@ -39,6 +39,10 @@
     <None Include="..\Graphics\icon.png" Pack="true" PackagePath="\graphics" />
     <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Reflection\" />
+  </ItemGroup>
   
 </Project>
 

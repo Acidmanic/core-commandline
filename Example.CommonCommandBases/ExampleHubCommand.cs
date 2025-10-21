@@ -5,7 +5,7 @@ using CoreCommandLine.CommonCommandBases;
 
 namespace Example.CommonCommandBases
 {
-    
+    [RootCommand]
     [CommandName("example-hub","eh")]
     [Subcommands(typeof(ExampleParameterCommand),typeof(ExampleFlagCommand))]
     public class ExampleHubCommand:HubCommandBase

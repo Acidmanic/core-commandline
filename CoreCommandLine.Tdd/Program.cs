@@ -1,22 +1,14 @@
-﻿using  System;
+﻿using CoreCommandLine;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.LightWeight;
 
 
-namespace CoreCommandLine.Tdd
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            var app = new ExampleApplication
-            {
-                ApplicationTitle = "Example hello world application",
-                ApplicationDescription = "\tType --help or -h for help \n\tType exit for exit."
-            };
+var builder = new ConsoleApplicationBuilder()
+    .UseLogger(new ConsoleLogger())
+    .Describe("Example hello world application", "\tType --help or -h for help \n\tType exit for exit.")
+    .BeforeCommandExecutes(a => a.Application.Logger.LogInformation($"-------------- <{a.Command.GetCommandName().Value.Name}> -----------------"))
+    .AfterCommandExecutes(a => a.Application.Logger.LogInformation($"-------------- </{a.Command.GetCommandName().Value.Name}> -----------------"));
 
-            app.Output = s => app.Logger.LogInformation("\n{Text}",s);
-            
-            app.ExecuteInteractive();
-        }
-    }
-}
+var app = builder.Build();
+
+app.ExecuteInteractive();

@@ -1,4 +1,5 @@
-﻿using Example.Di;
+﻿using CoreCommandLine;
+using Example.Di;
 using Example.Di.Commands;
 using Example.Di.Contracts;
 using Example.Di.Services;
@@ -14,10 +15,14 @@ thirdPartyDi.AddTransient<Echo>();
 
 var provider = new SillyDiResolver(thirdPartyDi);
 
-var app = new Application();
 
-app.UseResolver(provider);
+var builder = new ConsoleApplicationBuilder();
 
-app.Logger = new ConsoleLogger();
+builder
+    .Describe("Di Example", "This application represents di usage.")
+    .UseResolver(provider)
+    .UseLogger(new ConsoleLogger());
 
-app.ExecuteInteractive();
+var app = builder.Build();
+
+app.Execute(["echo","Hey!"]);

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace CoreCommandLine.Tdd.Commands
 {
     [CommandName("hello")]
+    [RootCommand]
     [Subcommands(typeof(Upper),typeof(Lower))]
     public class Hello:CommandBase
     {

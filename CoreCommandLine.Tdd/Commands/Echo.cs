@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CoreCommandLine.Tdd.Commands
 {
+    [RootCommand]
     [CommandName("echo", "e")]
     [Subcommands(typeof(Sentence))]
     public class Echo : HubCommandBase

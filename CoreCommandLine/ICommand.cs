@@ -11,7 +11,6 @@ namespace CoreCommandLine
         string Description { get; }
 
         void SetLogger(ILogger logger);
-
-        void SetOutput(Action<string> output);
+        
     }
 }

@@ -7,6 +7,7 @@ namespace Example.Di.Commands
 {
     
     
+    [RootCommand]
     [CommandName("echo","-e")]
     public class Echo:CommandBase
     {
