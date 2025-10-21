@@ -4,7 +4,15 @@ namespace CoreCommandLine
 {
     public class Context
     {
+        internal CommandFactory Factory { get; }
+        
         private Dictionary<string, object> _data = new Dictionary<string, object>();
+
+        internal Context(CommandFactory factory)
+        {
+            Factory = factory;
+        }
+
 
         public void Set<T>(string key, T value)
         {

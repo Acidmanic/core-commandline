@@ -1,20 +1,14 @@
-using System;
-using System.Collections.Generic;
-using Acidmanic.Utilities.Reflection;
-using CoreCommandLine.Attributes;
-using Microsoft.Extensions.Logging;
-
 namespace CoreCommandLine
 {
-    public class CommandUtilities
+    internal class CommandUtilities
     {
-        public static string GetHelpMessage(List<Type> childrenTypes)
+        public static string GetHelpMessage(CommandFactory instantiator, List<Type> childrenTypes)
         {
             var message = "";
 
             foreach (var childType in childrenTypes)
             {
-                var child = CommandInstantiator.Instance.Instantiate(childType);
+                var child = instantiator.Instantiate(childType);
 
                 if (child)
                 {
@@ -71,7 +65,7 @@ namespace CoreCommandLine
                    AreNamesEqual(commandName.ShortName, name);
         }
 
-        public static bool AreNamesEqual(string name1, string name2)
+        public static bool AreNamesEqual(string? name1, string? name2)
         {
             if (name1 == null && name2 == null)
             {

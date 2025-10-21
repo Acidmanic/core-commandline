@@ -24,100 +24,45 @@ namespace CoreCommandLine
 
         internal Action<ExecutionActionAssets> AfterExecute { get; set; } = _ => { };
 
+        internal Action<Context> InitializeContext { get; set; } = _ => { };
 
-        public IResolver Resolver
-        {
-            get => CommandInstantiator.Instance.Resolver;
-            private set => CommandInstantiator.Instance.UseResolver(value);
-        }
+        private readonly CommandFactory factory;
 
-
-        public CommandLineApplication(List<Assembly> assemblies)
+        public CommandLineApplication(List<Assembly> assemblies, IResolver resolver)
         {
             _applicationSubCommands = extractRootCommands(assemblies);
+
+            factory = new CommandFactory(resolver, _applicationSubCommands);
         }
 
 
         private List<Type> extractRootCommands(List<Assembly> assemblies)
         {
-            var typeCenter = Acidmanic.Utilities.Reflection.TypeCenter.TypeCenterService.Make();
+            var types = new List<Type>();
 
-            assemblies.ForEach(a => typeCenter.Cache(a));
+            foreach (var assembly in assemblies)
+            {
+                types.AddRange(assembly.GetTypes());
+            }
 
-            var rootCommands = typeCenter.GetTypesWhichExtend<CommandBase>().Where(t => t.GetCustomAttributes().Any(a => a is RootCommandAttribute))
+            var baseType = typeof(ICommand);
+
+            var rootCommands = types
+                .Where(t => t.IsAssignableTo(baseType))
+                .Where(t => t.GetCustomAttributes().Any(a => a is RootCommandAttribute))
                 .Distinct()
                 .ToList();
 
             return rootCommands;
         }
 
-
-        protected bool IsRootCommand(Type commandType)
-        {
-            foreach (var type in _applicationSubCommands)
-            {
-                if (type == commandType)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        protected bool IsRootCommand(ICommand command)
-        {
-            if (command == null)
-            {
-                return false;
-            }
-
-            return IsRootCommand(command.GetType());
-        }
-
-        protected List<Type> GetChildrenTypes(Type type, bool addExit)
-        {
-            var childrenTypes = new List<Type>();
-
-            var commandLineApplicationType = typeof(CommandLineApplication);
-            
-            if (commandLineApplicationType == type ||  type.IsSubclassOf(commandLineApplicationType))
-            {
-                childrenTypes.AddRange(_applicationSubCommands);
-            }
-
-            var childrenAttribute = type.GetCustomAttributes<SubcommandsAttribute>(true).FirstOrDefault();
-
-            if (childrenAttribute != null)
-            {
-                childrenTypes.AddRange(childrenAttribute.Children);
-            }
-
-            var genericHelpType = typeof(Help<>);
-
-            if (!type.IsGenericType || type.GetGenericTypeDefinition() != genericHelpType)
-            {
-                var helpType = genericHelpType.MakeGenericType(type);
-
-                childrenTypes.Add(helpType);
-            }
-
-            if (addExit && type.IsSubclassOf(typeof(CommandLineApplication)))
-            {
-                childrenTypes.Add(typeof(Exit));
-            }
-
-            return childrenTypes;
-        }
-
-
         public void Execute(string[] args)
         {
-            var context = new Context();
+            var context = new Context(factory);
 
             InitializeContext(context);
 
-            var type = this.GetType();
+            var type = GetType();
 
             WrapExecute(type, context, args, false);
         }
@@ -136,7 +81,7 @@ namespace CoreCommandLine
 
             while (stay)
             {
-                var context = new Context();
+                var context = new Context(factory);
 
                 InitializeContext(context);
 
@@ -173,11 +118,11 @@ namespace CoreCommandLine
 
         private Result<ICommand> FindRootCommand(string[] args)
         {
-            if (args != null && args.Length > 0)
+            if (args is { Length: > 0 })
             {
-                var command = CommandFactory.Instance.Make(args[0], this.GetType(),_applicationSubCommands);
+                var command = factory.Make(args[0], this.GetType(), false);
 
-                if (command != null && command.GetType() != typeof(NullCommand))
+                if (command.GetType() != typeof(NullCommand))
                 {
                     return new Result<ICommand>().Succeed(command);
                 }
@@ -210,7 +155,7 @@ namespace CoreCommandLine
                 return;
             }
 
-            var childrenTypes = GetChildrenTypes(parentType, useExitCommand);
+            var childrenTypes = factory.GetChildrenTypes(parentType, useExitCommand);
 
             foreach (var childType in childrenTypes)
             {
@@ -222,7 +167,7 @@ namespace CoreCommandLine
                 Execute(childType, context, args, useExitCommand);
             }
 
-            var instance = CommandInstantiator.Instance.Instantiate(parentType);
+            var instance = factory.Instantiate(parentType);
 
             if (instance && !context.ApplicationExit)
             {
@@ -230,10 +175,6 @@ namespace CoreCommandLine
 
                 instance.Value.Execute(context, args);
             }
-        }
-        
-        protected virtual void InitializeContext(Context context)
-        {
         }
     }
 }

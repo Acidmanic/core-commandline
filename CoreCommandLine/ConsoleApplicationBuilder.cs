@@ -18,15 +18,17 @@ namespace CoreCommandLine
         }
         
         private ILogger _logger;
-        private string _description = null;
-        private string _title = null;
-        private readonly ServiceCollectorProxy _services = new ServiceCollectorProxy();
+        private string? _description = null;
+        private string? _title = null;
+        private readonly ServiceCollectorProxy _services = new();
         private IConfigurationBuilder configurationBuilder;
         private readonly List<Assembly> assemblies = [];
 
         private Action<ExecutionActionAssets> onBeforeExecute = _ => { };
 
         private Action<ExecutionActionAssets> onAfterExecute = _ => { };
+        
+        private Action<Context> onInitializeContext = _ => { };
 
         private Resolver resolver = Resolver.DotnetResolver;
         private IResolver? customResolver;
@@ -91,10 +93,8 @@ namespace CoreCommandLine
             }
             
             serviceCollection.AddTransient<IResolver>(sp => new DotnetServiceProviderResolver(sp));
-
-            CommandInstantiator.Instance.UseResolver(selectedResolver);
             
-            var application = new CommandLineApplication(assemblies);
+            var application = new CommandLineApplication(assemblies,selectedResolver);
 
             application.Logger = _logger;
 
@@ -104,7 +104,8 @@ namespace CoreCommandLine
 
             application.BeforeExecute = onBeforeExecute;
             application.AfterExecute = onAfterExecute;
-
+            application.InitializeContext = onInitializeContext;
+            
             return application;
         }
 
@@ -159,6 +160,18 @@ namespace CoreCommandLine
         public ConsoleApplicationBuilder AfterCommandExecutes(Action<ExecutionActionAssets> action)
         {
             onAfterExecute = action;
+
+            return this;
+        }
+        
+        /// <summary>
+        /// The action set here would be performed when ever application re-initializes it's context which includes inter-commands data
+        /// </summary>
+        /// <param name="action">the action to be performed</param>
+        /// <returns></returns>
+        public ConsoleApplicationBuilder InitializeContext(Action<Context> action)
+        {
+            onInitializeContext = action;
 
             return this;
         }

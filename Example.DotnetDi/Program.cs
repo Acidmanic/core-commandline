@@ -18,7 +18,4 @@ builder.Services.AddTransient<Echo>();
 
 var app = builder.Build();
 
-app.Logger.LogInformation("I Have a provider: {Provider} " +
-                          " but nothing configure with it!", app.Resolver.Services);
-
 app.ExecuteInteractive();

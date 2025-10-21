@@ -1,4 +1,3 @@
-using System;
 using Acidmanic.Utilities.Reflection;
 using CoreCommandLine.Attributes;
 using Microsoft.Extensions.Logging;
@@ -23,9 +22,9 @@ namespace CoreCommandLine
 
             if (CanHelp(ownerType, args))
             {
-                var childrenTypes = ownerType.GetChildren();
-
-                var message = CommandUtilities.GetHelpMessage(childrenTypes);
+                var childrenTypes = context.Factory.GetChildrenTypes(ownerType,false);
+                
+                var message = CommandUtilities.GetHelpMessage(context.Factory,childrenTypes);
 
                 _output(message);
 

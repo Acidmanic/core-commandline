@@ -10,37 +10,21 @@ namespace CoreCommandLine
 {
     public static class CommandExtensions
     {
-
-        public static  Result<NameBundle> GetCommandName(this ICommand command)
+        public static Result<NameBundle> GetCommandName(this ICommand command)
         {
             if (command != null)
             {
                 return GetCommandName(command.GetType());
             }
+
             return new Result<NameBundle>().FailAndDefaultValue();
         }
 
-        public static List<Type> GetChildren(this Type commandType)
-        {
-          
-                var childrenAttribute = 
-                    commandType.GetCustomAttributes<SubcommandsAttribute>()
-                        .FirstOrDefault();
-                if (childrenAttribute != null)
-                {
-                    return childrenAttribute.Children;
-                }
-          
-
-            return new List<Type>();
-        }
-        
-        
-        public static  Result<NameBundle> GetCommandName(this Type commandType)
+        public static Result<NameBundle> GetCommandName(this Type commandType)
         {
             if (TypeCheck.Implements<ICommand>(commandType))
             {
-                var nameAttribute = 
+                var nameAttribute =
                     commandType.GetCustomAttributes<CommandNameAttribute>()
                         .FirstOrDefault();
 
