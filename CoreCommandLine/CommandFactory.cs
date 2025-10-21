@@ -36,7 +36,9 @@ namespace CoreCommandLine
         {
             List<Type> children;
             
-            if (TypeCheck.Extends<CommandLineApplication>(caller))
+            var applicationType = typeof(CommandLineApplication);
+            
+            if (applicationType == caller || caller.IsSubclassOf(applicationType))
             {
                 children = applicationSubCommands;
             }
