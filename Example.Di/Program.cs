@@ -1,32 +1,23 @@
-﻿using Example.Di.Commands;
+﻿using Example.Di;
+using Example.Di.Commands;
 using Example.Di.Contracts;
 using Example.Di.Services;
-using Microsoft.Extensions.DependencyInjection;
+using Example.Di.SimpleThirdpartyDiExample;
 using Microsoft.Extensions.Logging.LightWeight;
 
-namespace Example.Di
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            var services = new ServiceCollection();
 
-            services.AddTransient<IUpperCaseService, UpperCaseService>();
-            services.AddTransient<IAddDateService, AddDateService>();
-            services.AddTransient<Echo>();
-            
-            
-            var provider = services.BuildServiceProvider();
+var thirdPartyDi = new SillyDi();
 
-            var app = new Application();
+thirdPartyDi.AddTransient<IUpperCaseService, UpperCaseService>();
+thirdPartyDi.AddTransient<IAddDateService, AddDateService>();
+thirdPartyDi.AddTransient<Echo>();
 
-            app.UseDotnetResolver(provider);
+var provider = new SillyDiResolver(thirdPartyDi);
 
-            app.Logger = new ConsoleLogger();
+var app = new Application();
 
-            app.ExecuteInteractive();
-                        
-        }
-    }
-}
+app.UseResolver(provider);
+
+app.Logger = new ConsoleLogger();
+
+app.ExecuteInteractive();

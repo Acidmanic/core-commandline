@@ -217,6 +217,13 @@ namespace CoreCommandLine
             return this;
         }
         
+        public CommandLineApplication UseResolver(IResolver resolver)
+        {
+            CommandInstantiator.Instance.UseResolver(resolver);
+
+            return this;
+        }
+        
        
         protected virtual void InitializeContext(Context context)
         {

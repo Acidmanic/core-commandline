@@ -5,7 +5,7 @@ namespace CoreCommandLine.Di
     public interface IResolver
     {
 
-        object Resolve(Type type);
+        object? Resolve(Type type);
         
         public IServiceProvider Services { get; }
     }
@@ -27,7 +27,7 @@ namespace CoreCommandLine.Di
     }
     
     
-    internal static class ResolverDotnetDiExtensions
+    public static class ResolverDotnetDiExtensions
     {
         public static IServiceProvider ToServiceProvider(this IResolver resolver) =>  new ServiceProviderResolver(resolver);
     }
