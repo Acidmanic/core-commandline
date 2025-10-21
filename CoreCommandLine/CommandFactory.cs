@@ -25,7 +25,9 @@ namespace CoreCommandLine
 
             if (applicationType == caller || caller.IsSubclassOf(applicationType))
             {
-                children = applicationSubCommands;
+                children = new List<Type>(applicationSubCommands);
+
+                if (includeExitCommand) children.Add(typeof(Exit));
             }
             else
             {
@@ -85,7 +87,9 @@ namespace CoreCommandLine
                 childrenTypes.AddRange(childrenAttribute.Children);
             }
 
-            if (addExit && type.IsSubclassOf(typeof(CommandLineApplication)))
+            var commandlineApplicationType = typeof(CommandLineApplication);
+
+            if (addExit && (type == commandlineApplicationType || type.IsSubclassOf(commandlineApplicationType)))
             {
                 childrenTypes.Add(typeof(Exit));
             }

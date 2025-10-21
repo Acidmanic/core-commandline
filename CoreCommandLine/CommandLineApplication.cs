@@ -52,7 +52,7 @@ namespace CoreCommandLine
                 .Where(t => t.GetCustomAttributes().Any(a => a is RootCommandAttribute))
                 .Distinct()
                 .ToList();
-
+            
             return rootCommands;
         }
 
@@ -85,9 +85,9 @@ namespace CoreCommandLine
 
                 InitializeContext(context);
 
-                var type = this.GetType();
+                var type = GetType();
 
-                string line = Console.ReadLine();
+                string line = Console.ReadLine() ?? string.Empty;
 
                 var args = line.SplitToArgs();
 
@@ -116,11 +116,11 @@ namespace CoreCommandLine
             return line;
         }
 
-        private Result<ICommand> FindRootCommand(string[] args)
+        private Result<ICommand> FindRootCommand(string[] args, bool includeExitCommand)
         {
             if (args is { Length: > 0 })
             {
-                var command = factory.Make(args[0], this.GetType(), false);
+                var command = factory.Make(args[0], this.GetType(), includeExitCommand);
 
                 if (command.GetType() != typeof(NullCommand))
                 {
@@ -133,7 +133,7 @@ namespace CoreCommandLine
 
         private void WrapExecute(Type type, Context context, string[] args, bool useExitCommand)
         {
-            var foundCommand = FindRootCommand(args);
+            var foundCommand = FindRootCommand(args,useExitCommand);
 
             if (foundCommand)
             {
