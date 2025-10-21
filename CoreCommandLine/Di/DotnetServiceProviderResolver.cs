@@ -23,5 +23,7 @@ namespace CoreCommandLine.Di
 
             return null;
         }
+
+        public IServiceProvider Services => _serviceProvider;
     }
 }

@@ -8,5 +8,7 @@ namespace CoreCommandLine.Di
         {
             return null;
         }
+
+        public IServiceProvider Services => this.ToServiceProvider();
     }
 }

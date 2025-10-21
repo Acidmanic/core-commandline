@@ -12,4 +12,9 @@
     <ProjectReference Include="..\CoreCommandLine\CoreCommandLine.csproj" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Compile Include="Program.cs.dotnet3.0.example" />
+  </ItemGroup>
+
 </Project>

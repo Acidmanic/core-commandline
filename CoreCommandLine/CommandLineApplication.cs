@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Acidmanic.Utilities.Results;
 using CoreCommandLine.Attributes;
@@ -24,7 +21,7 @@ namespace CoreCommandLine
 
         private readonly List<Type> _applicationSubCommands;
 
-        protected IResolver Resolver
+        public IResolver Resolver
         {
             get => CommandInstantiator.Instance.Resolver;
             private set => CommandInstantiator.Instance.UseResolver(value);
@@ -232,5 +229,7 @@ namespace CoreCommandLine
         protected virtual void OnAfterExecution(Context context, string[] args, ICommand command)
         {
         }
+        
+        
     }
 }
