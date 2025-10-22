@@ -1,13 +1,12 @@
-using System;
 using Microsoft.Extensions.Logging;
 
 namespace CoreCommandLine
 {
     public class NullCommand:ICommand
     {
-        public bool Execute(Context context, string[] args)
+        public int Execute(Context context, string[] args)
         {
-            return true;
+            return 0;
         }
 
         public string Name => "Null";
@@ -17,8 +16,5 @@ namespace CoreCommandLine
         {
         }
 
-        public void SetOutput(Action<string> output)
-        {
-        }
     }
 }

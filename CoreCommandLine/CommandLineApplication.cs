@@ -52,7 +52,7 @@ namespace CoreCommandLine
                 .Where(t => t.GetCustomAttributes().Any(a => a is RootCommandAttribute))
                 .Distinct()
                 .ToList();
-            
+
             return rootCommands;
         }
 
@@ -133,7 +133,7 @@ namespace CoreCommandLine
 
         private void WrapExecute(Type type, Context context, string[] args, bool useExitCommand)
         {
-            var foundCommand = FindRootCommand(args,useExitCommand);
+            var foundCommand = FindRootCommand(args, useExitCommand);
 
             if (foundCommand)
             {
@@ -148,23 +148,43 @@ namespace CoreCommandLine
             }
         }
 
-        private void Execute(Type parentType, Context context, string[] args, bool useExitCommand)
+        private int Execute(Type parentType, Context context, string[] args, bool useExitCommand)
         {
             if (context.ApplicationExit)
             {
-                return;
+                return 0;
             }
 
             var childrenTypes = factory.GetChildrenTypes(parentType, useExitCommand);
 
-            foreach (var childType in childrenTypes)
+            var childrenTypeNameBundles = childrenTypes.Select(ct => new
             {
-                if (context.ApplicationExit)
+                NameBUndle = ct.GetCommandName(),
+                Type = ct
+            }).ToList();
+
+            int argIndex = 0;
+            
+            while (argIndex < args.Length)
+            {
+                var currentCommand = args[argIndex];
+
+                var childType = childrenTypeNameBundles.FirstOrDefault(
+                    tb => CommandUtilities.AreNamesEqual(tb.NameBUndle, currentCommand));
+
+                if (childType is { } ctb)
                 {
-                    return;
+                    var shiftArgs = args.Skip(argIndex + 1).ToArray();
+                    
+                    argIndex += Execute(ctb.Type,context,shiftArgs,useExitCommand);
                 }
 
-                Execute(childType, context, args, useExitCommand);
+                argIndex++;
+                
+                if (context.ApplicationExit)
+                {
+                    return 0;
+                }
             }
 
             var instance = factory.Instantiate(parentType);
@@ -173,8 +193,10 @@ namespace CoreCommandLine
             {
                 instance.Value.SetLogger(Logger);
 
-                instance.Value.Execute(context, args);
+                return instance.Value.Execute(context, args);
             }
+
+            return 0;
         }
     }
 }

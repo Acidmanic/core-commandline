@@ -19,29 +19,18 @@ namespace Example.DotnetDi.Commands
         }
 
 
-        public override bool Execute(Context context, string[] args)
+        public override int Execute(Context context, string[] args)
         {
-            var index = IndexOf(NameBundle, args);
+            var echoString = string.Join(' ',args);
+            
+            var upper = _upperCaseService.ToUpper(echoString);
+            var dated = _addDateService.AddDate(echoString);
 
-            if (index > -1)
-            {
-                var echoString = "";
+            Logger.LogInformation("Original: {Value}", echoString);
+            Logger.LogInformation("UpperCase: {Value}", upper);
+            Logger.LogInformation("WithDate: {Value}", dated);
 
-                for (int i = index + 1; i < args.Length; i++)
-                {
-                    echoString += args[i] + " ";
-                }
-
-                var upper = _upperCaseService.ToUpper(echoString);
-                var dated = _addDateService.AddDate(echoString);
-
-                Logger.LogInformation("Original: {Value}", echoString);
-                Logger.LogInformation("UpperCase: {Value}", upper);
-                Logger.LogInformation("WithDate: {Value}", dated);
-            }
-
-            // I was not present
-            return false;
+            return args.Length;
         }
     }
 }

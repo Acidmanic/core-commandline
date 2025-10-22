@@ -1,4 +1,3 @@
-using System;
 using Acidmanic.Utilities.Results;
 using Microsoft.Extensions.Logging;
 
@@ -27,7 +26,7 @@ namespace CoreCommandLine
             }
         }
 
-        public abstract bool Execute(Context context, string[] args);
+        public abstract int Execute(Context context, string[] args);
 
         public virtual string Description => GetType().Name;
 
@@ -98,55 +97,6 @@ namespace CoreCommandLine
         protected bool AreNamesEqual(string name1, string name2)
         {
             return CommandUtilities.AreNamesEqual(name1, name2);
-        }
-
-        /// <summary>
-        /// Determines if the given string[]args starts with current commands .
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="args">input arguments to be processed</param>
-        /// <returns>
-        /// True if this set of inputs should result in execution of current command. Otherwise returns False.
-        /// </returns>
-        protected bool IsThisSetMyCommand(Context context, string[] args)
-        {
-            return IsThisSetMyCommand(context, args, c => { });
-        }
-
-        /// <summary>
-        /// Determines if the given string[]args starts with current commands. It the answer is correct, it will
-        /// run the given matchAction.
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="args">input arguments to be processed</param>
-        /// <returns>
-        /// True if this set of inputs should result in execution of current command. Otherwise returns False.
-        /// </returns>
-        protected bool IsThisSetMyCommand(Context context, string[] args, Action<CommandArguments> matchAction)
-        {
-            var arguments = GetCommandArguments(args);
-
-            if (arguments)
-            {
-                if (AreNamesEqual(NameBundle, arguments.Value.Command))
-                {
-                    matchAction(arguments.Value);
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Searches the args[] array to see if current command is appeared. 
-        /// </summary>
-        /// <param name="args">input arguments to be processed</param>
-        /// <returns>True if current command name is mentioned in inputs. Otherwise returns False.</returns>
-        protected bool AmIPresent(string[] args)
-        {
-            return IndexOf(NameBundle, args) > -1;
         }
 
         /// <summary>

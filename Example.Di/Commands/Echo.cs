@@ -5,13 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Example.Di.Commands
 {
-    
-    
     [RootCommand]
-    [CommandName("echo","-e")]
-    public class Echo:CommandBase
+    [CommandName("echo", "-e")]
+    public class Echo : CommandBase
     {
-
         private readonly IUpperCaseService _upperCaseService;
         private readonly IAddDateService _addDateService;
 
@@ -22,28 +19,18 @@ namespace Example.Di.Commands
         }
 
 
-        public override bool Execute(Context context, string[] args)
+        public override int Execute(Context context, string[] args)
         {
-            var index = IndexOf(NameBundle, args);
+            var echoString = string.Join(' ',args);
 
-            if (index > -1)
-            {
-                var echoString = "";
+            var upper = _upperCaseService.ToUpper(echoString);
+            var dated = _addDateService.AddDate(echoString);
 
-                for (int i = index + 1; i < args.Length; i++)
-                {
-                    echoString += args[i] + " ";
-                }
+            Logger.LogInformation("Original: {Value}", echoString);
+            Logger.LogInformation("UpperCase: {Value}", upper);
+            Logger.LogInformation("WithDate: {Value}", dated);
 
-                var upper = _upperCaseService.ToUpper(echoString);
-                var dated = _addDateService.AddDate(echoString);
-                
-                Logger.LogInformation("Original: {Value}",echoString);
-                Logger.LogInformation("UpperCase: {Value}",upper);
-                Logger.LogInformation("WithDate: {Value}",dated);
-            }
-            // I was not present
-            return false;
+            return args.Length;
         }
     }
 }

@@ -7,65 +7,60 @@ namespace CoreCommandLine
     [CommandName("--help", "-h")]
     public class Help<T> : ICommand
     {
-
         private ILogger _logger = new ConsoleOutput();
-        private Action<string> _output = Console.WriteLine; 
+        private Action<string> _output = Console.WriteLine;
+
         private NameBundle NameBundle { get; } = new NameBundle
         {
             Name = "--help",
             ShortName = "-h"
         };
 
-        public bool Execute(Context context, string[] args)
+        public int Execute(Context context, string[] args)
         {
             var ownerType = typeof(T);
 
-            if (CanHelp(ownerType, args))
-            {
-                var childrenTypes = context.Factory.GetChildrenTypes(ownerType,false);
-                
-                var message = CommandUtilities.GetHelpMessage(context.Factory,childrenTypes);
+            var childrenTypes = context.Factory.GetChildrenTypes(ownerType, false);
 
-                _output(message);
+            var message = CommandUtilities.GetHelpMessage(context.Factory, childrenTypes);
 
-                context.ApplicationExit = true;
+            _output(message);
 
-                return true;
-            }
+            context.ApplicationExit = true;
 
-            return false;
+            return 0;
         }
 
 
-        private bool CanHelp(Type ownerType, string[] args)
-        {
-            if (!TypeCheck.Implements<ICommand>(ownerType))
-            {
-                return CommandUtilities.IndexOf(NameBundle, args) > -1;
-            }
-
-            var ownerName = ownerType.GetCommandName();
-
-            if (ownerName)
-            {
-                var ownerIndex = CommandUtilities.IndexOf(ownerName.Value, args);
-
-                if (ownerIndex > -1)
-                {
-                    if (args.Length > ownerIndex + 1)
-                    {
-                        var expectedMyName = args[ownerIndex + 1].ToLower();
-
-                        if (expectedMyName == "--help" || expectedMyName == "-h")
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
+        // private bool CanHelp(Type ownerType, string[] args)
+        // {
+        //     if (!TypeCheck.Implements<ICommand>(ownerType))
+        //     {
+        //         return CommandUtilities.IndexOf(NameBundle, args) > -1;
+        //     }
+        //
+        //     var ownerName = ownerType.GetCommandName();
+        //
+        //     if (ownerName)
+        //     {
+        //         var ownerIndex = CommandUtilities.IndexOf(ownerName.Value, args);
+        //
+        //         if (ownerIndex > -1)
+        //         {
+        //             if (args.Length > ownerIndex + 1)
+        //             {
+        //                 var expectedMyName = args[ownerIndex + 1].ToLower();
+        //
+        //                 if (expectedMyName == "--help" || expectedMyName == "-h")
+        //                 {
+        //                     return true;
+        //                 }
+        //             }
+        //         }
+        //     }
+        //
+        //     return false;
+        // }
 
         public string Description => "Displays this message";
 

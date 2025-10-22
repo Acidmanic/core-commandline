@@ -6,15 +6,17 @@ using CoreCommandLine.CommonCommandBases;
 namespace Example.CommonCommandBases
 {
     [RootCommand]
-    [CommandName("example-hub","eh")]
-    [Subcommands(typeof(ExampleParameterCommand),typeof(ExampleFlagCommand))]
-    public class ExampleHubCommand:HubCommandBase
+    [CommandName("example-hub", "eh")]
+    [Subcommands(typeof(ExampleParameterCommand), typeof(ExampleFlagCommand))]
+    public class ExampleHubCommand : CommandBase
     {
-        protected override void Execute(Context context, CommandArguments arguments)
+        public override int Execute(Context context, string[] args)
         {
             Console.WriteLine("This is a hub command. It Performs some task.");
-            Console.WriteLine($"The flag argument is {(context.Get(ExampleFlagCommand.Key,false)?"":"NOT")} set.");
-            Console.WriteLine("The parameter argument is: " + context.Get(ExampleParameterCommand.Key,"[None Given]"));
+            Console.WriteLine($"The flag argument is {(context.Get(ExampleFlagCommand.Key, false) ? "" : "NOT")} set.");
+            Console.WriteLine("The parameter argument is: " + context.Get(ExampleParameterCommand.Key, "[None Given]"));
+
+            return 0;
         }
     }
 }

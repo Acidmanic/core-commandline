@@ -1,19 +1,23 @@
+using Microsoft.Extensions.Logging;
+
 namespace CoreCommandLine.CommonCommandBases
 {
-    public  abstract class ParameterCommandBase:CommandBase
+    public abstract class ParameterCommandBase : CommandBase
     {
-        public override bool Execute(Context context, string[] args)
+        public override int Execute(Context context, string[] args)
         {
-            if (AmIPresent(args))
+            if (args.Length > 0)
             {
                 var value = FindMyValue(args);
 
-                RetrieveData(context,value.Value);
-                
-                return true;
+                RetrieveData(context, value.Value);
+
+                return 1;
             }
 
-            return false;
+            Logger.LogWarning("No value has been given for {Name}",Name);
+            
+            return 0;
         }
 
         protected abstract void RetrieveData(Context context, string parameterStringValue);

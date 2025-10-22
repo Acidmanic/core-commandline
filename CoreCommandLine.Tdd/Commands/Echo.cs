@@ -8,13 +8,15 @@ namespace CoreCommandLine.Tdd.Commands
     [RootCommand]
     [CommandName("echo", "e")]
     [Subcommands(typeof(Sentence))]
-    public class Echo : HubCommandBase
+    public class Echo : CommandBase
     {
-        protected override void Execute(Context context, CommandArguments arguments)
+        public override int Execute(Context context, string[] args)
         {
             var sentence = context.Get(Sentence.Key, "");
 
             Logger.LogInformation("[ECHO] {Sentence}", sentence);
+
+            return 0;
         }
     }
 }
