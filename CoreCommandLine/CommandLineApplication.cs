@@ -18,8 +18,6 @@ namespace CoreCommandLine
 
         public string ApplicationDescription { get; set; } = "";
 
-        private readonly List<Type> _applicationSubCommands;
-
         internal Action<ExecutionActionAssets> BeforeExecute { get; set; } = _ => { };
 
         internal Action<ExecutionActionAssets> AfterExecute { get; set; } = _ => { };
@@ -30,9 +28,9 @@ namespace CoreCommandLine
 
         public CommandLineApplication(List<Assembly> assemblies, IResolver resolver)
         {
-            _applicationSubCommands = extractRootCommands(assemblies);
+            var applicationSubCommands = extractRootCommands(assemblies);
 
-            factory = new CommandFactory(resolver, _applicationSubCommands);
+            factory = new CommandFactory(resolver, applicationSubCommands);
         }
 
 
