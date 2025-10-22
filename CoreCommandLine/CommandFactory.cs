@@ -61,7 +61,7 @@ namespace CoreCommandLine
                 }
             }
 
-            return new NullCommand();
+            return new CommandNotFoundCommand();
         }
 
         public List<Type> GetChildrenTypes(Type type, bool addExit)

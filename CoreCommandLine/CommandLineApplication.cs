@@ -62,7 +62,7 @@ namespace CoreCommandLine
 
             var type = GetType();
 
-            await WrapExecute(type, context, args, false, cancellationToken);
+            await Execute(type, context, args, false, true, cancellationToken);
         }
 
         public async Task ExecuteInteractive(CancellationToken cancellationToken)
@@ -89,7 +89,7 @@ namespace CoreCommandLine
 
                 var args = line.SplitToArgs();
 
-                await WrapExecute(type, context, args, true, cancellationToken);
+                await Execute(type, context, args, true, true, cancellationToken);
 
                 stay = !context.InteractiveExit;
             }
@@ -114,40 +114,11 @@ namespace CoreCommandLine
             return line;
         }
 
-        private Result<ICommand> FindRootCommand(string[] args, bool includeExitCommand)
-        {
-            if (args is { Length: > 0 })
-            {
-                var command = factory.Make(args[0], this.GetType(), includeExitCommand);
+        //
 
-                if (command.GetType() != typeof(NullCommand))
-                {
-                    return new Result<ICommand>().Succeed(command);
-                }
-            }
-
-            return new Result<ICommand>().FailAndDefaultValue();
-        }
-
-        private async Task WrapExecute(Type type, Context context, string[] args, bool useExitCommand,
-            CancellationToken cancellationToken)
-        {
-            var foundCommand = FindRootCommand(args, useExitCommand);
-
-            if (foundCommand)
-            {
-                BeforeExecute(new ExecutionActionAssets(context, args, foundCommand.Value, this));
-            }
-
-            await Execute(type, context, args, useExitCommand, cancellationToken);
-
-            if (foundCommand)
-            {
-                AfterExecute(new ExecutionActionAssets(context, args, foundCommand.Value, this));
-            }
-        }
-
-        private async Task<int> Execute(Type parentType, Context context, string[] args, bool useExitCommand,
+        private async Task<int> Execute(
+            Type parentType, Context context, string[] args, bool useExitCommand,
+            bool wrapExecution,
             CancellationToken cancellationToken)
         {
             if (context.ApplicationExit)
@@ -176,7 +147,7 @@ namespace CoreCommandLine
                 {
                     var shiftArgs = args.Skip(argIndex + 1).ToArray();
 
-                    argIndex += await Execute(ctb.Type, context, shiftArgs, useExitCommand, cancellationToken);
+                    argIndex += await Execute(ctb.Type, context, shiftArgs, useExitCommand, false, cancellationToken);
                 }
 
                 argIndex++;
@@ -187,16 +158,27 @@ namespace CoreCommandLine
                 }
             }
 
-            var instance = factory.Instantiate(parentType);
 
-            if (instance && !context.ApplicationExit)
+            var instance = factory.Make(args.FirstOrDefault() ?? string.Empty, parentType, useExitCommand);
+
+            if (!context.ApplicationExit)
             {
-                instance.Value.SetLogger(Logger);
-
-                return await instance.Value.Execute(context, args, cancellationToken);
+                return await ExecuteWrapped(context, args, instance, wrapExecution, cancellationToken);
             }
 
             return 0;
+        }
+
+        private async Task<int> ExecuteWrapped(Context context, string[] args, ICommand command, bool wrap,
+            CancellationToken cancellationToken)
+        {
+            if (wrap) BeforeExecute(new ExecutionActionAssets(context, args, command, this));
+
+            var numberOfArguments = await command.Execute(context, args, cancellationToken);
+
+            if (wrap) AfterExecute(new ExecutionActionAssets(context, args, command, this));
+
+            return numberOfArguments;
         }
     }
 }
