@@ -8,9 +8,13 @@ namespace CoreCommandLine
         
         private Dictionary<string, object> _data = new Dictionary<string, object>();
 
-        internal Context(CommandFactory factory)
+        public bool IsApplicationRunningInteractive { get;  }
+
+        internal Context(CommandFactory factory, bool isApplicationRunningInteractive)
         {
             Factory = factory;
+            
+            IsApplicationRunningInteractive = isApplicationRunningInteractive;
         }
 
 

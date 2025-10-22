@@ -2,13 +2,15 @@ namespace CoreCommandLine
 {
     internal class CommandUtilities
     {
-        public static string GetHelpMessage(CommandFactory instantiator, List<Type> childrenTypes)
+        public static string GetHelpMessage(CommandFactory factory, Type ownerType, bool addExit)
         {
             var message = "";
+            
+            var childrenTypes = factory.GetChildrenTypes(ownerType, addExit);
 
             foreach (var childType in childrenTypes)
             {
-                var child = instantiator.Instantiate(childType);
+                var child = factory.Instantiate(childType);
 
                 if (child)
                 {

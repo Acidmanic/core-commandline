@@ -19,9 +19,7 @@ namespace CoreCommandLine
         {
             var ownerType = typeof(T);
 
-            var childrenTypes = context.Factory.GetChildrenTypes(ownerType, false);
-
-            var message = CommandUtilities.GetHelpMessage(context.Factory, childrenTypes);
+            var message = CommandUtilities.GetHelpMessage(context.Factory,ownerType,context.IsApplicationRunningInteractive);
 
             _output(message);
 

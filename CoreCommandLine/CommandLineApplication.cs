@@ -58,7 +58,7 @@ namespace CoreCommandLine
 
         public void Execute(string[] args)
         {
-            var context = new Context(factory);
+            var context = new Context(factory, false);
 
             InitializeContext(context);
 
@@ -81,7 +81,7 @@ namespace CoreCommandLine
 
             while (stay)
             {
-                var context = new Context(factory);
+                var context = new Context(factory, true);
 
                 InitializeContext(context);
 
@@ -164,7 +164,7 @@ namespace CoreCommandLine
             }).ToList();
 
             int argIndex = 0;
-            
+
             while (argIndex < args.Length)
             {
                 var currentCommand = args[argIndex];
@@ -175,12 +175,12 @@ namespace CoreCommandLine
                 if (childType is { } ctb)
                 {
                     var shiftArgs = args.Skip(argIndex + 1).ToArray();
-                    
-                    argIndex += Execute(ctb.Type,context,shiftArgs,useExitCommand);
+
+                    argIndex += Execute(ctb.Type, context, shiftArgs, useExitCommand);
                 }
 
                 argIndex++;
-                
+
                 if (context.ApplicationExit)
                 {
                     return 0;
