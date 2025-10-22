@@ -1,5 +1,6 @@
 using CoreCommandLine;
 using CoreCommandLine.Attributes;
+using CoreCommandLine.CommonCommandBases;
 using Example.Di.Contracts;
 using Microsoft.Extensions.Logging;
 
@@ -7,7 +8,7 @@ namespace Example.Di.Commands
 {
     [RootCommand]
     [CommandName("echo", "-e")]
-    public class Echo : CommandBase
+    public class Echo : ArgumentRangeCommandBase
     {
         private readonly IUpperCaseService _upperCaseService;
         private readonly IAddDateService _addDateService;
@@ -17,9 +18,8 @@ namespace Example.Di.Commands
             _upperCaseService = upperCaseService;
             _addDateService = addDateService;
         }
-
-
-        public override int Execute(Context context, string[] args)
+        
+        protected override void DoExecute(Context context, string[] args)
         {
             var echoString = string.Join(' ',args);
 
@@ -30,7 +30,6 @@ namespace Example.Di.Commands
             Logger.LogInformation("UpperCase: {Value}", upper);
             Logger.LogInformation("WithDate: {Value}", dated);
 
-            return args.Length;
         }
     }
 }

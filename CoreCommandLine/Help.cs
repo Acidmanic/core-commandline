@@ -1,4 +1,3 @@
-using Acidmanic.Utilities.Reflection;
 using CoreCommandLine.Attributes;
 using Microsoft.Extensions.Logging;
 
@@ -31,36 +30,7 @@ namespace CoreCommandLine
             return 0;
         }
 
-
-        // private bool CanHelp(Type ownerType, string[] args)
-        // {
-        //     if (!TypeCheck.Implements<ICommand>(ownerType))
-        //     {
-        //         return CommandUtilities.IndexOf(NameBundle, args) > -1;
-        //     }
-        //
-        //     var ownerName = ownerType.GetCommandName();
-        //
-        //     if (ownerName)
-        //     {
-        //         var ownerIndex = CommandUtilities.IndexOf(ownerName.Value, args);
-        //
-        //         if (ownerIndex > -1)
-        //         {
-        //             if (args.Length > ownerIndex + 1)
-        //             {
-        //                 var expectedMyName = args[ownerIndex + 1].ToLower();
-        //
-        //                 if (expectedMyName == "--help" || expectedMyName == "-h")
-        //                 {
-        //                     return true;
-        //                 }
-        //             }
-        //         }
-        //     }
-        //
-        //     return false;
-        // }
+        public Task<int> Execute(Context context, string[] args, CancellationToken cancellationToken) => Task.FromResult(Execute(context, args));
 
         public string Description => "Displays this message";
 

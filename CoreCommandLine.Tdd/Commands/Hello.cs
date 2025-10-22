@@ -1,5 +1,6 @@
 using System;
 using CoreCommandLine.Attributes;
+using CoreCommandLine.CommonCommandBases;
 using CoreCommandLine.Tdd.Commands.Arguments;
 using CoreCommandLine.Tdd.Commands.Models;
 using Microsoft.Extensions.Logging;
@@ -9,9 +10,9 @@ namespace CoreCommandLine.Tdd.Commands
     [CommandName("hello")]
     [RootCommand]
     [Subcommands(typeof(Upper), typeof(Lower))]
-    public class Hello : CommandBase
+    public class Hello : NodeCommandBase
     {
-        public override int Execute(Context context, string[] args)
+        protected override void Execute(Context context)
         {
             var message = "Hello";
 
@@ -27,8 +28,6 @@ namespace CoreCommandLine.Tdd.Commands
             }
 
             Output(message);
-
-            return 0;
         }
 
         public override string Description => "Prints the phrase Hello.";

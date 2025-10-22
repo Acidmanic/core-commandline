@@ -28,6 +28,8 @@ namespace CoreCommandLine
 
         public abstract int Execute(Context context, string[] args);
 
+        public abstract Task<int> Execute(Context context, string[] args, CancellationToken cancellationToken);
+
         public virtual string Description => GetType().Name;
 
         protected ILogger Logger { get; private set; } = new ConsoleOutput();

@@ -1,16 +1,15 @@
 using CoreCommandLine.Attributes;
+using CoreCommandLine.CommonCommandBases;
 using CoreCommandLine.Tdd.Commands.Models;
 
 namespace CoreCommandLine.Tdd.Commands.Arguments
 {
     [CommandName("--upper", "-u")]
-    public class Upper : CommandBase
+    public class Upper : ParameterCommandBase
     {
-        public override int Execute(Context context, string[] args)
+        protected override void RetrieveData(Context context, string parameterStringValue)
         {
             context.Set(nameof(TextStyle), TextStyle.Upper);
-
-            return 0;
         }
 
         public override string Description => "This Argument Sets output to UPPER case.";

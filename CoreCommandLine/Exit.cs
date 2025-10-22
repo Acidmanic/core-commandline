@@ -15,6 +15,8 @@ namespace CoreCommandLine
             return 0;
         }
 
+        public override Task<int> Execute(Context context, string[] args, CancellationToken cancellationToken) => Task.FromResult(Execute(context, args));
+
         public override string Description => "Exits the interactive mode.";
     }
 }

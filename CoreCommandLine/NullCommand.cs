@@ -9,6 +9,11 @@ namespace CoreCommandLine
             return 0;
         }
 
+        public Task<int> Execute(Context context, string[] args, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(0);
+        }
+
         public string Name => "Null";
         public string ShortName => "";
         public string Description => "";

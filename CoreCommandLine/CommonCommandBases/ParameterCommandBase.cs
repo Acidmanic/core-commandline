@@ -1,3 +1,4 @@
+using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
 
 namespace CoreCommandLine.CommonCommandBases
@@ -15,9 +16,14 @@ namespace CoreCommandLine.CommonCommandBases
                 return 1;
             }
 
-            Logger.LogWarning("No value has been given for {Name}",Name);
-            
+            Logger.LogWarning("No value has been given for {Name}", Name);
+
             return 0;
+        }
+
+        public override Task<int> Execute(Context context, string[] args, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(Execute(context, args));
         }
 
         protected abstract void RetrieveData(Context context, string parameterStringValue);
