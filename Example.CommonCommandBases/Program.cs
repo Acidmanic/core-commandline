@@ -7,4 +7,4 @@ var app = new ConsoleApplicationBuilder()
     .UseLogger(new ConsoleLogger().Shorten())
     .Build();
 
-app.ExecuteInteractive();
+await app.ExecuteInteractive(CancellationToken.None);

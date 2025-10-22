@@ -54,7 +54,7 @@ namespace CoreCommandLine
             return rootCommands;
         }
 
-        public void Execute(string[] args)
+        public async Task Execute(string[] args, CancellationToken cancellationToken)
         {
             var context = new Context(factory, false);
 
@@ -62,10 +62,10 @@ namespace CoreCommandLine
 
             var type = GetType();
 
-            WrapExecute(type, context, args, false);
+            await WrapExecute(type, context, args, false, cancellationToken);
         }
 
-        public void ExecuteInteractive()
+        public async Task ExecuteInteractive(CancellationToken cancellationToken)
         {
             Logger.LogInformation(ApplicationTitle);
 
@@ -89,7 +89,7 @@ namespace CoreCommandLine
 
                 var args = line.SplitToArgs();
 
-                WrapExecute(type, context, args, true);
+                await WrapExecute(type, context, args, true, cancellationToken);
 
                 stay = !context.InteractiveExit;
             }
@@ -129,7 +129,8 @@ namespace CoreCommandLine
             return new Result<ICommand>().FailAndDefaultValue();
         }
 
-        private void WrapExecute(Type type, Context context, string[] args, bool useExitCommand)
+        private async Task WrapExecute(Type type, Context context, string[] args, bool useExitCommand,
+            CancellationToken cancellationToken)
         {
             var foundCommand = FindRootCommand(args, useExitCommand);
 
@@ -138,7 +139,7 @@ namespace CoreCommandLine
                 BeforeExecute(new ExecutionActionAssets(context, args, foundCommand.Value, this));
             }
 
-            Execute(type, context, args, useExitCommand);
+            await Execute(type, context, args, useExitCommand, cancellationToken);
 
             if (foundCommand)
             {
@@ -146,7 +147,8 @@ namespace CoreCommandLine
             }
         }
 
-        private int Execute(Type parentType, Context context, string[] args, bool useExitCommand)
+        private async Task<int> Execute(Type parentType, Context context, string[] args, bool useExitCommand,
+            CancellationToken cancellationToken)
         {
             if (context.ApplicationExit)
             {
@@ -174,7 +176,7 @@ namespace CoreCommandLine
                 {
                     var shiftArgs = args.Skip(argIndex + 1).ToArray();
 
-                    argIndex += Execute(ctb.Type, context, shiftArgs, useExitCommand);
+                    argIndex += await Execute(ctb.Type, context, shiftArgs, useExitCommand, cancellationToken);
                 }
 
                 argIndex++;
@@ -191,7 +193,7 @@ namespace CoreCommandLine
             {
                 instance.Value.SetLogger(Logger);
 
-                return instance.Value.Execute(context, args);
+                return await instance.Value.Execute(context, args, cancellationToken);
             }
 
             return 0;

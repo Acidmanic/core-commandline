@@ -11,4 +11,4 @@ var builder = new ConsoleApplicationBuilder()
 
 var app = builder.Build();
 
-app.ExecuteInteractive();
+await app.ExecuteInteractive(CancellationToken.None);

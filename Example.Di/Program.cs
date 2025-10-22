@@ -25,4 +25,4 @@ builder
 
 var app = builder.Build();
 
-app.Execute(["echo","Hey!"]);
+await app.Execute(["echo","Hey!"],CancellationToken.None);

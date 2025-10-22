@@ -3,7 +3,6 @@ using Example.DotnetDi.Commands;
 using Example.DotnetDi.Contracts;
 using Example.DotnetDi.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.LightWeight;
 
 var builder = new ConsoleApplicationBuilder()
@@ -18,4 +17,4 @@ builder.Services.AddTransient<Echo>();
 
 var app = builder.Build();
 
-app.ExecuteInteractive();
+await app.ExecuteInteractive(CancellationToken.None);
