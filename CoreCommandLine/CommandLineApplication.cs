@@ -197,6 +197,8 @@ namespace CoreCommandLine
 
                 var instance = _commandUtilities.Instantiate(parentType) ?? new UnableToResolveCommand(parentName);
 
+                instance.SetLogger(Logger);
+                
                 consumedArguments = await ExecuteWrapped(context, args, instance, wrapExecution, cancellationToken);
             }
 
