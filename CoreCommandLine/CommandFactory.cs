@@ -1,6 +1,5 @@
 using System.Reflection;
 using Acidmanic.Utilities.Reflection;
-using Acidmanic.Utilities.Results;
 using CoreCommandLine.Attributes;
 using CoreCommandLine.Di;
 
@@ -17,49 +16,49 @@ namespace CoreCommandLine
             this.applicationSubCommands = applicationSubCommands;
         }
 
-        public ICommand Make(string name, Type caller, bool includeExitCommand)
-        {
-            List<Type> children;
+        // public ICommand Make(string name, Type caller, bool includeExitCommand)
+        // {
+        //     List<Type> children;
+        //
+        //     var applicationType = typeof(CommandLineApplication);
+        //
+        //     if (applicationType == caller || caller.IsSubclassOf(applicationType))
+        //     {
+        //         children = new List<Type>(applicationSubCommands);
+        //
+        //         if (includeExitCommand) children.Add(typeof(Exit));
+        //     }
+        //     else
+        //     {
+        //         children = GetChildrenTypes(caller, includeExitCommand);
+        //     }
+        //
+        //     return Make(name, children);
+        // }
 
-            var applicationType = typeof(CommandLineApplication);
 
-            if (applicationType == caller || caller.IsSubclassOf(applicationType))
-            {
-                children = new List<Type>(applicationSubCommands);
-
-                if (includeExitCommand) children.Add(typeof(Exit));
-            }
-            else
-            {
-                children = GetChildrenTypes(caller, includeExitCommand);
-            }
-
-            return Make(name, children);
-        }
-
-
-        private ICommand Make(string name, List<Type> children)
-        {
-            if (!string.IsNullOrEmpty(name))
-            {
-                foreach (var child in children)
-                {
-                    var foundName = child.GetCommandName();
-
-                    if (foundName)
-                    {
-                        if (AreNamesEqual(foundName.Value, name))
-                        {
-                            var instance = Instantiate(child);
-
-                            if (instance is { } instantiated) return instantiated;
-                        }
-                    }
-                }
-            }
-
-            return new CommandNotFoundCommand();
-        }
+        // private ICommand Make(string name, List<Type> children)
+        // {
+        //     if (!string.IsNullOrEmpty(name))
+        //     {
+        //         foreach (var child in children)
+        //         {
+        //             var foundName = child.GetCommandName();
+        //
+        //             if (foundName)
+        //             {
+        //                 if (AreNamesEqual(foundName.Value, name))
+        //                 {
+        //                     var instance = Instantiate(child);
+        //
+        //                     if (instance is { } instantiated) return instantiated;
+        //                 }
+        //             }
+        //         }
+        //     }
+        //
+        //     return new CommandNotFoundCommand();
+        // }
 
         public List<Type> GetChildrenTypes(Type type, bool addExit)
         {

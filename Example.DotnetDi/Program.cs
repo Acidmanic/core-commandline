@@ -14,6 +14,7 @@ var builder = new ConsoleApplicationBuilder()
 builder.Services.AddTransient<IUpperCaseService, UpperCaseService>();
 builder.Services.AddTransient<IAddDateService, AddDateService>();
 builder.Services.AddTransient<Echo>();
+builder.Services.AddTransient<Hello>();
 
 var app = builder.Build();
 

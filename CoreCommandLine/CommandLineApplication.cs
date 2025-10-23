@@ -1,6 +1,5 @@
 using System.Reflection;
-using Acidmanic.Utilities.Reflection;
-using Acidmanic.Utilities.Results;
+using System.Runtime.CompilerServices;
 using CoreCommandLine.Attributes;
 using CoreCommandLine.Di;
 using CoreCommandLine.Dtos;
@@ -13,6 +12,8 @@ namespace CoreCommandLine
     public class CommandLineApplication
     {
         private sealed record TypedNameBundle(NameBundle NameBundle, Type Type);
+
+        private sealed record NotFound(string Name, Type CallerType);
 
         public ILogger Logger { get; internal set; } = new ConsoleLogger();
 
@@ -116,11 +117,33 @@ namespace CoreCommandLine
             return line;
         }
 
-        //
+        private async Task Execute(Type parentType, Context context, string[] args, bool useExitCommand,
+            bool wrapExecution,
+            CancellationToken cancellationToken)
+        {
+            var notFoundCommands = new List<NotFound>();
+
+            await Execute(parentType, context, args, useExitCommand, wrapExecution, notFoundCommands,
+                cancellationToken);
+
+            foreach (var notFound in notFoundCommands)
+            {
+                var helpBundle = typeof(Help<object>).GetCommandName();
+
+                var callerPhrase = notFound.CallerType.IsAssignableTo(typeof(ICommand))
+                    ? " as a sub-command of "+notFound.CallerType.GetCommandName().Value.Name + " "
+                    : string.Empty;
+                
+                Logger.LogError("No command named '{CommandName}' has been found{CallerPhrase}, use {Name} Or {ShortName} to display help message.",
+                    notFound.Name,callerPhrase, helpBundle.Value.Name, helpBundle.Value.ShortName);
+            }
+        }
+
 
         private async Task<int> Execute(
             Type parentType, Context context, string[] args, bool useExitCommand,
             bool wrapExecution,
+            List<NotFound> notFoundCommands,
             CancellationToken cancellationToken)
         {
             if (context.ApplicationExit)
@@ -133,7 +156,7 @@ namespace CoreCommandLine
             var childrenTypeNameBundles = childrenTypes.Select(ct => new
                 TypedNameBundle(ct.GetCommandName(), ct)).ToList();
 
-            var notFounds = new Dictionary<int, CommandNotFoundCommand>();
+            var notFounds = new Dictionary<int, string>();
 
             int argIndex = 0;
 
@@ -148,12 +171,11 @@ namespace CoreCommandLine
                 {
                     var shiftArgs = args.Skip(argIndex + 1).ToArray();
 
-                    argIndex += await Execute(childType.Type, context, shiftArgs, useExitCommand, false,
-                        cancellationToken);
+                    argIndex += await Execute(childType.Type, context, shiftArgs, useExitCommand, false, notFoundCommands, cancellationToken);
                 }
                 else
                 {
-                    notFounds.Add(argIndex, new CommandNotFoundCommand());
+                    notFounds.Add(argIndex, currentCommand);
                 }
 
                 argIndex++;
@@ -177,13 +199,12 @@ namespace CoreCommandLine
 
                 consumedArguments = await ExecuteWrapped(context, args, instance, wrapExecution, cancellationToken);
             }
-            
+
             foreach (var kv in notFounds)
             {
-                if (kv.Key >= consumedArguments)
-                {
-                    kv.Value.Execute(context,[]);
-                }
+                if (kv.Key >= consumedArguments &&
+                    notFoundCommands.All(nf => nf.Name != kv.Value && nf.CallerType != parentType))
+                    notFoundCommands.Add(new NotFound(kv.Value, parentType));
             }
 
             return consumedArguments;
