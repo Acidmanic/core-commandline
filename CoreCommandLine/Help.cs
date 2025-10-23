@@ -19,7 +19,7 @@ namespace CoreCommandLine
         {
             var ownerType = typeof(T);
 
-            var message = CommandUtilities.GetHelpMessage(context.Factory,ownerType,context.IsApplicationRunningInteractive);
+            var message = context.CommandUtilities.GetHelpMessage(ownerType, context.IsApplicationRunningInteractive);
 
             _output(message);
 
@@ -28,7 +28,8 @@ namespace CoreCommandLine
             return 0;
         }
 
-        public Task<int> Execute(Context context, string[] args, CancellationToken cancellationToken) => Task.FromResult(Execute(context, args));
+        public Task<int> Execute(Context context, string[] args, CancellationToken cancellationToken) =>
+            Task.FromResult(Execute(context, args));
 
         public string Description => "Displays this message";
 

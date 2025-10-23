@@ -4,15 +4,15 @@ namespace CoreCommandLine
 {
     public class Context
     {
-        internal CommandFactory Factory { get; }
+        internal CommandUtilities CommandUtilities { get; }
         
-        private Dictionary<string, object> _data = new Dictionary<string, object>();
+        private readonly Dictionary<string, object> _data = new();
 
         public bool IsApplicationRunningInteractive { get;  }
 
-        internal Context(CommandFactory factory, bool isApplicationRunningInteractive)
+        internal Context(CommandUtilities commandUtilities, bool isApplicationRunningInteractive)
         {
-            Factory = factory;
+            CommandUtilities = commandUtilities;
             
             IsApplicationRunningInteractive = isApplicationRunningInteractive;
         }

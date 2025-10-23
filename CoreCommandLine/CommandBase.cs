@@ -83,22 +83,22 @@ namespace CoreCommandLine
 
         protected int IndexOf(string name, string[] args)
         {
-            return CommandUtilities.IndexOf(name, args);
+            return ArgumentProcess.IndexOf(name, args);
         }
 
         protected int IndexOf(NameBundle nameBundle, string[] args)
         {
-            return CommandUtilities.IndexOf(nameBundle, args);
+            return ArgumentProcess.IndexOf(nameBundle, args);
         }
 
         protected bool AreNamesEqual(NameBundle commandName, string name)
         {
-            return CommandUtilities.AreNamesEqual(commandName, name);
+            return ArgumentProcess.AreNamesEqual(commandName, name);
         }
 
         protected bool AreNamesEqual(string name1, string name2)
         {
-            return CommandUtilities.AreNamesEqual(name1, name2);
+            return ArgumentProcess.AreNamesEqual(name1, name2);
         }
 
         /// <summary>

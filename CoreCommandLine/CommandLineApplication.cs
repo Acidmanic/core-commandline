@@ -27,13 +27,13 @@ namespace CoreCommandLine
 
         internal Action<Context> InitializeContext { get; set; } = _ => { };
 
-        private readonly CommandFactory _factory;
+        private readonly CommandUtilities _commandUtilities;
 
         public CommandLineApplication(List<Assembly> assemblies, IResolver resolver)
         {
             var applicationSubCommands = ExtractRootCommands(assemblies);
 
-            _factory = new CommandFactory(resolver, applicationSubCommands);
+            _commandUtilities = new CommandUtilities(resolver, applicationSubCommands);
         }
 
 
@@ -59,7 +59,7 @@ namespace CoreCommandLine
 
         public async Task Execute(string[] args, CancellationToken cancellationToken)
         {
-            var context = new Context(_factory, false);
+            var context = new Context(_commandUtilities, false);
 
             InitializeContext(context);
 
@@ -82,7 +82,7 @@ namespace CoreCommandLine
 
             while (stay)
             {
-                var context = new Context(_factory, true);
+                var context = new Context(_commandUtilities, true);
 
                 InitializeContext(context);
 
@@ -151,7 +151,7 @@ namespace CoreCommandLine
                 return 0;
             }
 
-            var childrenTypes = _factory.GetChildrenTypes(parentType, useExitCommand);
+            var childrenTypes = _commandUtilities.GetChildrenTypes(parentType, useExitCommand);
 
             var childrenTypeNameBundles = childrenTypes.Select(ct => new
                 TypedNameBundle(ct.GetCommandName(), ct)).ToList();
@@ -165,7 +165,7 @@ namespace CoreCommandLine
                 var currentCommand = args[argIndex];
 
                 var childType = childrenTypeNameBundles.FirstOrDefault(
-                    tb => CommandUtilities.AreNamesEqual(tb.NameBundle, currentCommand));
+                    tb => ArgumentProcess.AreNamesEqual(tb.NameBundle, currentCommand));
 
                 if (childType is { } ct)
                 {
@@ -195,7 +195,7 @@ namespace CoreCommandLine
 
                 var parentName = parentNameBundle.Success ? parentNameBundle.Value.Name : parentType.Name;
 
-                var instance = _factory.Instantiate(parentType) ?? new UnableToResolveCommand(parentName);
+                var instance = _commandUtilities.Instantiate(parentType) ?? new UnableToResolveCommand(parentName);
 
                 consumedArguments = await ExecuteWrapped(context, args, instance, wrapExecution, cancellationToken);
             }
