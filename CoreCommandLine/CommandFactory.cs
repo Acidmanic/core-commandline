@@ -52,10 +52,7 @@ namespace CoreCommandLine
                         {
                             var instance = Instantiate(child);
 
-                            if (instance)
-                            {
-                                return instance.Value;
-                            }
+                            if (instance is { } instantiated) return instantiated;
                         }
                     }
                 }
@@ -68,7 +65,7 @@ namespace CoreCommandLine
         {
             var childrenTypes = new List<Type>();
 
-            if (makeHelpType(type) is { } help)
+            if (MakeHelpType(type) is { } help)
             {
                 childrenTypes.Add(help);
             }
@@ -97,7 +94,7 @@ namespace CoreCommandLine
             return childrenTypes;
         }
 
-        private Type? makeHelpType(Type type)
+        private Type? MakeHelpType(Type type)
         {
             var genericHelpType = typeof(Help<>);
 
@@ -132,11 +129,12 @@ namespace CoreCommandLine
             return name1.ToLower() == name2.ToLower();
         }
 
-        public Result<ICommand> Instantiate(Type type)
+        public ICommand? Instantiate(Type type)
         {
-            var command = resolver.Resolve(type) as ICommand ?? new ObjectInstantiator().BlindInstantiate(type) as ICommand;
+            var command = resolver.Resolve(type) as ICommand ??
+                          new ObjectInstantiator().BlindInstantiate(type) as ICommand;
 
-            return new Result<ICommand>(command != null, command);
+            return command;
         }
     }
 }

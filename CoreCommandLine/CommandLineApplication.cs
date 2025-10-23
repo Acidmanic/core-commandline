@@ -12,6 +12,8 @@ namespace CoreCommandLine
 {
     public class CommandLineApplication
     {
+        private sealed record TypedNameBundle(NameBundle NameBundle, Type Type);
+
         public ILogger Logger { get; internal set; } = new ConsoleLogger();
 
         public string ApplicationTitle { get; set; } = "Command line Application";
@@ -24,17 +26,17 @@ namespace CoreCommandLine
 
         internal Action<Context> InitializeContext { get; set; } = _ => { };
 
-        private readonly CommandFactory factory;
+        private readonly CommandFactory _factory;
 
         public CommandLineApplication(List<Assembly> assemblies, IResolver resolver)
         {
-            var applicationSubCommands = extractRootCommands(assemblies);
+            var applicationSubCommands = ExtractRootCommands(assemblies);
 
-            factory = new CommandFactory(resolver, applicationSubCommands);
+            _factory = new CommandFactory(resolver, applicationSubCommands);
         }
 
 
-        private List<Type> extractRootCommands(List<Assembly> assemblies)
+        private List<Type> ExtractRootCommands(List<Assembly> assemblies)
         {
             var types = new List<Type>();
 
@@ -56,7 +58,7 @@ namespace CoreCommandLine
 
         public async Task Execute(string[] args, CancellationToken cancellationToken)
         {
-            var context = new Context(factory, false);
+            var context = new Context(_factory, false);
 
             InitializeContext(context);
 
@@ -79,7 +81,7 @@ namespace CoreCommandLine
 
             while (stay)
             {
-                var context = new Context(factory, true);
+                var context = new Context(_factory, true);
 
                 InitializeContext(context);
 
@@ -126,13 +128,12 @@ namespace CoreCommandLine
                 return 0;
             }
 
-            var childrenTypes = factory.GetChildrenTypes(parentType, useExitCommand);
+            var childrenTypes = _factory.GetChildrenTypes(parentType, useExitCommand);
 
             var childrenTypeNameBundles = childrenTypes.Select(ct => new
-            {
-                NameBUndle = ct.GetCommandName(),
-                Type = ct
-            }).ToList();
+                TypedNameBundle(ct.GetCommandName(), ct)).ToList();
+
+            var notFounds = new Dictionary<int, CommandNotFoundCommand>();
 
             int argIndex = 0;
 
@@ -141,13 +142,18 @@ namespace CoreCommandLine
                 var currentCommand = args[argIndex];
 
                 var childType = childrenTypeNameBundles.FirstOrDefault(
-                    tb => CommandUtilities.AreNamesEqual(tb.NameBUndle, currentCommand));
+                    tb => CommandUtilities.AreNamesEqual(tb.NameBundle, currentCommand));
 
-                if (childType is { } ctb)
+                if (childType is { } ct)
                 {
                     var shiftArgs = args.Skip(argIndex + 1).ToArray();
 
-                    argIndex += await Execute(ctb.Type, context, shiftArgs, useExitCommand, false, cancellationToken);
+                    argIndex += await Execute(childType.Type, context, shiftArgs, useExitCommand, false,
+                        cancellationToken);
+                }
+                else
+                {
+                    notFounds.Add(argIndex, new CommandNotFoundCommand());
                 }
 
                 argIndex++;
@@ -159,14 +165,28 @@ namespace CoreCommandLine
             }
 
 
-            var instance = factory.Make(args.FirstOrDefault() ?? string.Empty, parentType, useExitCommand);
+            var consumedArguments = 0;
 
-            if (!context.ApplicationExit)
+            if (!context.ApplicationExit && parentType != typeof(CommandLineApplication))
             {
-                return await ExecuteWrapped(context, args, instance, wrapExecution, cancellationToken);
+                var parentNameBundle = parentType.GetCommandName();
+
+                var parentName = parentNameBundle.Success ? parentNameBundle.Value.Name : parentType.Name;
+
+                var instance = _factory.Instantiate(parentType) ?? new UnableToResolveCommand(parentName);
+
+                consumedArguments = await ExecuteWrapped(context, args, instance, wrapExecution, cancellationToken);
+            }
+            
+            foreach (var kv in notFounds)
+            {
+                if (kv.Key >= consumedArguments)
+                {
+                    kv.Value.Execute(context,[]);
+                }
             }
 
-            return 0;
+            return consumedArguments;
         }
 
         private async Task<int> ExecuteWrapped(Context context, string[] args, ICommand command, bool wrap,

@@ -5,36 +5,33 @@ namespace CoreCommandLine
         public static string GetHelpMessage(CommandFactory factory, Type ownerType, bool addExit)
         {
             var message = "";
-            
+
             var childrenTypes = factory.GetChildrenTypes(ownerType, addExit);
 
             foreach (var childType in childrenTypes)
             {
                 var child = factory.Instantiate(childType);
+                
+                var nameBundle = childType.GetCommandName();
 
-                if (child)
+                if (nameBundle && child is {} )
                 {
-                    var nameBundle = childType.GetCommandName();
+                    var line = "\t" + nameBundle.Value.Name;
 
-                    if (nameBundle)
+                    if (nameBundle.Value.ShortName != nameBundle.Value.Name)
                     {
-                        var line = "\t" + nameBundle.Value.Name;
-
-                        if (nameBundle.Value.ShortName != nameBundle.Value.Name)
-                        {
-                            line += " | " + nameBundle.Value.ShortName;
-                        }
-
-                        line += "\t" + child.Value.Description;
-
-                        message += line + "\n";
+                        line += " | " + nameBundle.Value.ShortName;
                     }
+
+                    line += "\t" + child.Description;
+
+                    message += line + "\n";
                 }
             }
 
             return message;
         }
-        
+
         public static int IndexOf(string name, string[] args)
         {
             for (int i = 0; i < args.Length; i++)
@@ -59,8 +56,8 @@ namespace CoreCommandLine
 
             return index;
         }
-        
-        
+
+
         public static bool AreNamesEqual(NameBundle commandName, string name)
         {
             return AreNamesEqual(commandName.Name, name) ||
