@@ -12,7 +12,7 @@ namespace CoreCommandLine
 
             Logger.LogInformation("Exiting Interactive application...");
 
-            return 0;
+            return args.Length;
         }
 
         public override Task<int> Execute(Context context, string[] args, CancellationToken cancellationToken) => Task.FromResult(Execute(context, args));
