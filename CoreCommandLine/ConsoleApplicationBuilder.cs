@@ -20,7 +20,7 @@ namespace CoreCommandLine
         private ILogger _logger;
         private string? _description = null;
         private string? _title = null;
-        private readonly ServiceCollectorProxy _services = new();
+
         private IConfigurationBuilder configurationBuilder;
         private readonly List<Assembly> assemblies = [];
 
@@ -30,8 +30,11 @@ namespace CoreCommandLine
         
         private Action<Context> onInitializeContext = _ => { };
 
-        private Resolver resolver = Resolver.DotnetResolver;
+        private Resolver resolverType = Resolver.DotnetResolver;
+        
         private IResolver? customResolver;
+
+        private ServiceCollection serviceCollection;
         
         public ConsoleApplicationBuilder()
         {
@@ -39,7 +42,7 @@ namespace CoreCommandLine
         }
 
         /// <summary>
-        /// Allows introducing assemblies ouside of the entry applicatoin to be added manually, for example for when you
+        /// Allows introducing assemblies outside the entry application to be added manually, for example for when you
         /// have commands declared in external class library
         /// </summary>
         /// <param name="assembly">assembly instance to be added</param>
@@ -53,14 +56,14 @@ namespace CoreCommandLine
 
         public ConsoleApplicationBuilder UseDotnetResolver()
         {
-            resolver = Resolver.DotnetResolver;
+            resolverType = Resolver.DotnetResolver;
 
             return this;
         }
 
         public ConsoleApplicationBuilder UseResolver(IResolver r)
         {
-            resolver = Resolver.CustomResolver;
+            resolverType = Resolver.CustomResolver;
             customResolver = r;
             return this;
         }
@@ -71,28 +74,26 @@ namespace CoreCommandLine
         /// <returns></returns>
         public CommandLineApplication Build()
         {
-            var serviceCollection = _services.BuildServiceCollection();
-
             var configuration = configurationBuilder.Build();
 
             serviceCollection.AddSingleton(_logger);
 
-            serviceCollection.AddSingleton(configuration);
+            serviceCollection.AddSingleton<IConfiguration>(configuration);
 
             IResolver selectedResolver;
             
-            if (resolver == Resolver.CustomResolver && customResolver is {} cr)
+            if (resolverType == Resolver.CustomResolver && customResolver is {} cr)
             {
                 selectedResolver = cr;
             }
             else
             {
+                serviceCollection.AddTransient<IResolver>(sp => new DotnetServiceProviderResolver(sp));
+                
                 var serviceProvider = serviceCollection.BuildServiceProvider();
 
                 selectedResolver = new DotnetServiceProviderResolver(serviceProvider);
             }
-            
-            serviceCollection.AddTransient<IResolver>(sp => new DotnetServiceProviderResolver(sp));
             
             var application = new CommandLineApplication(assemblies,selectedResolver);
 
@@ -182,13 +183,13 @@ namespace CoreCommandLine
         public void Clear()
         {
             initializeAssemblies();
-            _services.Clear();
             createDefaultConfigurationBuilder();
             _logger = NullLogger.Instance;
-            resolver = Resolver.DotnetResolver;
+            resolverType = Resolver.DotnetResolver;
+            serviceCollection ??= new();
         }
 
-        public IServiceCollection Services => _services;
+        public IServiceCollection Services => serviceCollection;
 
         private void createDefaultConfigurationBuilder(string[]? args = null)
         {

@@ -12,14 +12,14 @@ namespace CoreCommandLine.Di
             _serviceProvider = serviceProvider;
         }
 
-        public object Resolve(Type type)
+        public object? Resolve(Type type)
         {
             try
             {
                 return _serviceProvider.GetService(type);
                 
             }
-            catch (Exception _) { }
+            catch  { /* ignore */ }
 
             return null;
         }
