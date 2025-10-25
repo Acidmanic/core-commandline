@@ -12,22 +12,72 @@ This is a light-weight dotnet standard 2.1 library, that you can add to your con
  How to use
  ==========
 
+  * Create a simple Console application
   * Install package from [NuGet](https://www.nuget.org/packages/CoreCommandLine)
-  * Create an application by extending the class ```CommandLineApplication```.
-  * Add each Command you need, by creating a class which implements ```ICommand```. You can also extend ```CommandBase``` instead, so you can make use of some pre implemented and helper methods in it.
-  * Introduce each command to your application by using the ```SubCommand``` attribute. ex:
-```c#
-
-  [Subcommands(typeof(FirstCommand),typeof(SecondCommand))]
-  public class ExampleApplication:CommandLineApplication{
-    ...
-  }
-```
-
-  * In your main application entry, instantiate your application and start it.
+  * Create Your commands
+  * Setup and execute the application in your entry file (progra.cs)
   
 
-___Please checkout the Example project in repository, for a quick start___
+Creating Commands
+-----------------
+
+  You can implement the ```ICommand``` interface. Prefferebly you can inherit one of the common base commands.
+
+
+__Implementing ```ICommand```__
+
+* Implement __Execute__ methods. It's reasonable to implement one of the Sync or Async versions regarding the nature of the task in hand, and then call the implemented method from the other version. When execute is called, it would receive all arguments available for it. but the method must return how many of these arguments was belonging to this command.
+
+    * The __Description__ property would return a description about what this command would do. It later would be displayed in help manual pages.
+
+    * The __SetLogger__ method would be called before command being executed and would deliver a logger object. This feature makes it easier to create simple commands that might only need a logger, without populating the command registery in di.
+
+
+* Apply needed attributes:
+    *  ```[RootCommand]```
+
+    __Root commands:__ A root command is a command which is a direct child of the application itself. In other words, when application is started with some arguments for exampl ```your-app first secods third```, it will look for command named __first__ in root commands and the _second_ and _third_ phrases in this example, they might be raw arguments for __first__ or sub-commands of __first__.
+
+    * ```[CommandName("name","-sn")]```
+
+    This attribute is needed to provide a name and a short name for your command. both these names can be used to call your command. They also will be displayed in help manual page.
+
+    * ```[SubCommands(typeof(SubCommandType),...)]```
+
+    This attribute will define subcommands for a command. Commands have a tree strcture in this sencse that each command can be considered the entry of an application. For example you can have __Request__ command which might have __Post__ and __Get__ sub commands. In this case the main work would be performed in Post and Get commands and the Request command is actually only a hub. Another example which is more common, would be commands which deliver a value to main command. For example you might have a __Download__ command which needs a url and also knowing that should it accept any ssl certificate or not. You can provide a __Uri__ subcommand to read the uri 
+    and a __--trust-certificates__ subcommand which if present, would indicate that certificates can be trusted. 
+
+
+The Context which is present in execute methods, is shared throuout the execution of each command and all it's children. So children can set the values into the context and the parent commands can retreive them by reading the context.
+
+__The child commands are always executed before their parents__
+
+
+
+__Extending Command base classes__
+
+* ```CommandBase```: this class is actualy a simple implementation of ```ICommand`` plus some helper mthods for reading and writing information.
+* ```NodeCommandBase:CommandBase``` and ```NodeAsyncCommandBase:CommandBase```:
+Node commands are the default base class for performing any task. This is the type to extend for commands that perform the duties of the application.
+
+* ```FlagCommandBase``` This command is a good choice for cases that you need set a flag if a certain command is present in the command line. (Ex. --trust-certificates)
+
+* ```ParameterCommandBase``` This is the base command for those cases that you want to specify a value for an argument. (Ex. url https://some.where.com)
+
+* ```ArgumentRangeCommandBase``` and ```ArgumentRangeAsyncCommandBase```: 
+this for those cases that you want to use a number of arguments given after the command name. If you return null 
+for ```NumberOfExpectedArguments```, the command would consume all the arguments to the end.
+
+
+The difference between the sync and async classes is that sync calsses provide a sync implementation, and their async method would call the sync method. And the async classes behave the opposite.
+
+
+Setting up the application
+--------------------------
+
+* Create an instance of ```ConsoleApplicationBuilder```
+  the builder allows you to set applications logger, set the title and description for the application,
+   choose dotnet core's builtin Di system or your own 
 
 Features
 =========
