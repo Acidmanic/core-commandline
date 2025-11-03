@@ -13,32 +13,37 @@ namespace CoreCommandLine
     {
         private enum Resolver
         {
-            DotnetResolver=0,
-            CustomResolver=1,
+            DotnetResolver = 0,
+            CustomResolver = 1,
         }
-        
+
         private ILogger _logger;
         private string? _description = null;
         private string? _title = null;
 
-        private IConfigurationBuilder configurationBuilder;
         private readonly List<Assembly> assemblies = [];
 
         private Action<ExecutionActionAssets> onBeforeExecute = _ => { };
 
         private Action<ExecutionActionAssets> onAfterExecute = _ => { };
-        
+
         private Action<Context> onInitializeContext = _ => { };
 
         private Resolver resolverType = Resolver.DotnetResolver;
-        
+
         private IResolver? customResolver;
 
         private ServiceCollection serviceCollection;
-        
-        public ConsoleApplicationBuilder()
+
+        private IConfiguration configuration;
+
+        public ConsoleApplicationBuilder(Action<IConfigurationBuilder>? configuration = null)
         {
-            Clear();
+            Action<IConfigurationBuilder> cfg = _ => { };
+
+            if (configuration is { } c) cfg = c;
+
+            Clear(cfg, []);
         }
 
         /// <summary>
@@ -67,35 +72,33 @@ namespace CoreCommandLine
             customResolver = r;
             return this;
         }
-        
+
         /// <summary>
         /// Builds an instance of Commandline application that can be started.
         /// </summary>
         /// <returns></returns>
         public CommandLineApplication Build()
         {
-            var configuration = configurationBuilder.Build();
-
             serviceCollection.AddSingleton(_logger);
 
-            serviceCollection.AddSingleton<IConfiguration>(configuration);
+            serviceCollection.AddSingleton(configuration);
 
             IResolver selectedResolver;
-            
-            if (resolverType == Resolver.CustomResolver && customResolver is {} cr)
+
+            if (resolverType == Resolver.CustomResolver && customResolver is { } cr)
             {
                 selectedResolver = cr;
             }
             else
             {
                 serviceCollection.AddTransient<IResolver>(sp => new DotnetServiceProviderResolver(sp));
-                
+
                 var serviceProvider = serviceCollection.BuildServiceProvider();
 
                 selectedResolver = new DotnetServiceProviderResolver(serviceProvider);
             }
-            
-            var application = new CommandLineApplication(assemblies,selectedResolver);
+
+            var application = new CommandLineApplication(assemblies, selectedResolver);
 
             application.Logger = _logger;
 
@@ -106,7 +109,7 @@ namespace CoreCommandLine
             application.BeforeExecute = onBeforeExecute;
             application.AfterExecute = onAfterExecute;
             application.InitializeContext = onInitializeContext;
-            
+
             return application;
         }
 
@@ -164,7 +167,7 @@ namespace CoreCommandLine
 
             return this;
         }
-        
+
         /// <summary>
         /// The action set here would be performed when ever application re-initializes it's context which includes inter-commands data
         /// </summary>
@@ -180,22 +183,25 @@ namespace CoreCommandLine
         /// <summary>
         /// Resets the builder for creating new instances
         /// </summary>
-        public void Clear()
+        public void Clear(Action<IConfigurationBuilder> configureConfigurations, string[] args)
         {
             initializeAssemblies();
             createDefaultConfigurationBuilder();
             _logger = NullLogger.Instance;
             resolverType = Resolver.DotnetResolver;
             serviceCollection ??= new();
+            var configurationBuilder = createDefaultConfigurationBuilder(args);
+            configureConfigurations(configurationBuilder);
+            this.configuration = configurationBuilder.Build();
         }
 
         public IServiceCollection Services => serviceCollection;
 
-        private void createDefaultConfigurationBuilder(string[]? args = null)
+        private IConfigurationBuilder createDefaultConfigurationBuilder(string[]? args = null)
         {
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-            configurationBuilder = new ConfigurationBuilder()
+            var configurationBuilder = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables()
                 .AddCommandLine(args ?? []);
@@ -209,6 +215,8 @@ namespace CoreCommandLine
                     configurationBuilder.AddJsonFile(configurationFile);
                 }
             }
+
+            return configurationBuilder;
         }
 
 
@@ -223,6 +231,6 @@ namespace CoreCommandLine
             assemblies.Add(Assembly.GetExecutingAssembly());
         }
 
-        public IConfigurationBuilder ConfigurationBuilder => configurationBuilder;
+        public IConfiguration Configuration => configuration;
     }
 }
