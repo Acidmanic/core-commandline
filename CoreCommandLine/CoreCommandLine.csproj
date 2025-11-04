@@ -20,7 +20,7 @@
 
   <PropertyGroup>
     <Authors>Mani Moayedi</Authors>
-    <Version>1.1.0-pr05</Version>
+    <Version>1.1.0-pr06</Version>
     <Company>Acidmanic</Company>
     <PackageIcon>graphics\icon.png</PackageIcon>
     <Description>This library provides an easy setup for a commandline application.</Description>
