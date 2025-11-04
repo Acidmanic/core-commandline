@@ -4,6 +4,7 @@ using CoreCommandLine.DotnetDi;
 using CoreCommandLine.Dtos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -35,15 +36,13 @@ namespace CoreCommandLine
 
         private ServiceCollection serviceCollection;
 
-        private IConfiguration configuration;
+        private IConfiguration serviceConfigurationInterface;
+
+        private readonly List<Action<IConfigurationBuilder>> configurationBuilderActions = [];
 
         public ConsoleApplicationBuilder(Action<IConfigurationBuilder>? configuration = null)
         {
-            Action<IConfigurationBuilder> cfg = _ => { };
-
-            if (configuration is { } c) cfg = c;
-
-            Clear(cfg, []);
+            Clear(configuration);
         }
 
         /// <summary>
@@ -79,26 +78,32 @@ namespace CoreCommandLine
         /// <returns></returns>
         public CommandLineApplication Build()
         {
+            var hostBuilder = Host.CreateDefaultBuilder([]).ConfigureHostConfiguration(performAllConfigurationActions);
+
             serviceCollection.AddSingleton(_logger);
 
-            serviceCollection.AddSingleton(configuration);
+            serviceCollection.AddSingleton(serviceConfigurationInterface);
 
-            IResolver selectedResolver;
+            var useDotnetDi = !(resolverType == Resolver.CustomResolver && customResolver != null);
 
-            if (resolverType == Resolver.CustomResolver && customResolver is { } cr)
+            if (useDotnetDi)
             {
-                selectedResolver = cr;
+                hostBuilder.ConfigureServices((hostContext, services) =>
+                {
+                    foreach (var serviceDescriptor in serviceCollection)
+                    {
+                        services.Add(serviceDescriptor);
+                    }
+
+                    services.AddTransient<IResolver>(sp => new DotnetServiceProviderResolver(sp));
+                });
             }
-            else
-            {
-                serviceCollection.AddTransient<IResolver>(sp => new DotnetServiceProviderResolver(sp));
 
-                var serviceProvider = serviceCollection.BuildServiceProvider();
+            var host = hostBuilder.Build();
 
-                selectedResolver = new DotnetServiceProviderResolver(serviceProvider);
-            }
+            var selectedResolver = useDotnetDi ? new DotnetServiceProviderResolver(host.Services) : customResolver!;
 
-            var application = new CommandLineApplication(assemblies, selectedResolver);
+            var application = new CommandLineApplication(assemblies, selectedResolver, host);
 
             application.Logger = _logger;
 
@@ -183,28 +188,36 @@ namespace CoreCommandLine
         /// <summary>
         /// Resets the builder for creating new instances
         /// </summary>
-        public void Clear(Action<IConfigurationBuilder> configureConfigurations, string[] args)
+        public void Clear(Action<IConfigurationBuilder>? configureConfigurations)
         {
             initializeAssemblies();
-            createDefaultConfigurationBuilder();
+            configurationBuilderActions.Clear();
+            if (configureConfigurations is { } c) configurationBuilderActions.Add(c);
+            configurationBuilderActions.Add(defaultAppSettingsConfigurations);
             _logger = NullLogger.Instance;
             resolverType = Resolver.DotnetResolver;
             serviceCollection ??= new();
-            var configurationBuilder = createDefaultConfigurationBuilder(args);
-            configureConfigurations(configurationBuilder);
-            this.configuration = configurationBuilder.Build();
+
+
+            var configurationBuilder = new ConfigurationBuilder();
+            performAllConfigurationActions(configurationBuilder);
+            serviceConfigurationInterface = configurationBuilder.Build();
         }
 
         public IServiceCollection Services => serviceCollection;
 
-        private IConfigurationBuilder createDefaultConfigurationBuilder(string[]? args = null)
+        private void performAllConfigurationActions(IConfigurationBuilder builder)
+        {
+            configurationBuilderActions.ForEach(a => a(builder));
+        }
+
+        private void defaultAppSettingsConfigurations(IConfigurationBuilder configurationBuilder)
         {
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-            var configurationBuilder = new ConfigurationBuilder()
+            configurationBuilder
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .AddCommandLine(args ?? []);
+                .AddEnvironmentVariables();
 
             if (environment is { } e)
             {
@@ -215,8 +228,6 @@ namespace CoreCommandLine
                     configurationBuilder.AddJsonFile(configurationFile);
                 }
             }
-
-            return configurationBuilder;
         }
 
 
@@ -231,6 +242,6 @@ namespace CoreCommandLine
             assemblies.Add(Assembly.GetExecutingAssembly());
         }
 
-        public IConfiguration Configuration => configuration;
+        public IConfiguration Configuration => serviceConfigurationInterface;
     }
 }

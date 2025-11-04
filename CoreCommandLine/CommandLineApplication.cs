@@ -4,6 +4,7 @@ using CoreCommandLine.Attributes;
 using CoreCommandLine.Di;
 using CoreCommandLine.Dtos;
 using CoreCommandLine.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.LightWeight;
 
@@ -28,9 +29,13 @@ namespace CoreCommandLine
         internal Action<Context> InitializeContext { get; set; } = _ => { };
 
         private readonly CommandUtilities _commandUtilities;
+        
+        private readonly IHost _host;
 
-        public CommandLineApplication(List<Assembly> assemblies, IResolver resolver)
+        public CommandLineApplication(List<Assembly> assemblies, IResolver resolver, IHost host)
         {
+            _host = host;
+            
             var applicationSubCommands = ExtractRootCommands(assemblies);
 
             _commandUtilities = new CommandUtilities(resolver, applicationSubCommands);
@@ -65,6 +70,8 @@ namespace CoreCommandLine
 
             var type = GetType();
 
+            _ = _host.RunAsync(cancellationToken);
+            
             await Execute(type, context, args, false, true, cancellationToken);
         }
 
@@ -80,6 +87,8 @@ namespace CoreCommandLine
 
             var stay = true;
 
+            _ = _host.RunAsync(cancellationToken);
+            
             while (stay)
             {
                 var context = new Context(_commandUtilities, true);
